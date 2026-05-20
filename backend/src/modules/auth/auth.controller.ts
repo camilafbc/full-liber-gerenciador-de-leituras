@@ -4,6 +4,7 @@ import { createUser, getUserByEmail } from "./auth.services";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../../types/User";
+import { ExtendedRequest } from "../../types/extended-request";
 
 export const signUp: RequestHandler = async (req, res) => {
   try {
@@ -75,33 +76,36 @@ export const signIn: RequestHandler = async (req, res) => {
 };
 
 export const userData: RequestHandler = async (req, res) => {
-  const user = req.user as User;
+  try {
+    const user = (req as ExtendedRequest).user as User;
 
-  if (!user) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
-  }
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
 
-  return res
-    .status(200)
-    .json({
+    return res.status(200).json({
       user: {
-        id: user.id,
+        uuid: user.uuid,
         name: user.name,
         email: user.email,
         avatar: user.avatarUrl,
       },
     });
+  } catch (error) {
+    console.error("Erro ao buscar dados do usuário: ", error);
+    return res.status(500).json({ error: "Erro ao buscar dados do usuário" });
+  }
 };
 
 export const googleCallback: RequestHandler = async (req, res) => {
   try {
-    const user = req.user;
+    const user = (req as ExtendedRequest).user;
 
     if (!user) {
       return res.status(401).json({ error: "Não autorizado" });
     }
 
-    const token = jwt.sign({ uuid: user }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ uuid: user.uuid }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
