@@ -2,9 +2,14 @@ import { Book } from "./books.types";
 
 export const searchGoogleBooks = async (
   query: string,
-): Promise<Omit<Book, "id">[]> => {
+  page: number = 1,
+  limit: number = 10,
+): Promise<{ totalItems: number; books: Omit<Book, "id">[] }> => {
   const API_KEY = process.env.GOOGLE_BOOKS_KEY as string;
-  const URL = `https://www.googleapis.com/books/v1/volumes?q=${query}&printType=books&key=${API_KEY}`;
+
+  const startIndex = (page - 1) * limit;
+
+  const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&key=${API_KEY}`;
 
   const response = await fetch(URL);
 
@@ -14,9 +19,9 @@ export const searchGoogleBooks = async (
 
   const data = await response.json();
 
-  if (!data) return [];
+  if (!data) return { totalItems: 0, books: [] };
 
-  return data.items.map((item) => ({
+  const books = data.items.map((item) => ({
     externalId: item.id,
     authors: item.volumeInfo.authors,
     title: item.volumeInfo.title,
@@ -26,8 +31,10 @@ export const searchGoogleBooks = async (
     pageCount: item.volumeInfo.pageCount,
     categories: item.volumeInfo.categories,
     imageUrl: item.volumeInfo.imageLinks?.thumbnail,
-    isbn13: item.volumeInfo.industryIdentifiers?.[1].identifier,
+    isbn13: item.volumeInfo.industryIdentifiers?.[1]?.identifier,
   }));
+
+  return { totalItems: data.totalItems || 0, books };
 };
 
 export const getBookFromGoogleBooks = async (

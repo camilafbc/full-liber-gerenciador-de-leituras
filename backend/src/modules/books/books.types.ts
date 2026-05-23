@@ -9,5 +9,5 @@ export interface Book {
   pageCount?: string;
   categories: string[];
   imageUrl?: string;
-  isbn13: string;
+  isbn13?: string;
 }
