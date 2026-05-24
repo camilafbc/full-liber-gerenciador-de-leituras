@@ -21,7 +21,10 @@ model User {
   avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   accounts Account[]
+  libraries Library[]
+  reviews Review[]
 
   @@map("users")
 }
@@ -39,3 +42,75 @@ model Account {
   @@map("accounts")
 }
 
+model Book {
+  id Int @id @default(autoincrement())
+  externalId String @unique
+  title String
+  subtitle String?
+  authors String[]
+  publishedDate String?
+  description String
+  pageCount Int @default(0)
+  categories String[]
+  imageUrl String?
+  isbn13 String?
+  createdAt DateTime @default(now())
+
+  userLibraries Library[]
+  reviews Review[]
+
+  @@map("books")
+}
+
+model Library {
+  id          Int         @id @default(autoincrement())
+  userId      String      
+  bookId      Int         
+  status      ReadingStatus @default(WANT_TO_READ) 
+  currentPage Int         @default(0)
+  addedAt     DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  finishedAt  DateTime?
+
+ 
+  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  readingLogs ReadingProgress[]
+
+  
+  @@unique([userId, bookId])
+  @@map("libraries")
+}
+
+model ReadingProgress {
+  id          Int      @id @default(autoincrement())
+  libraryId   Int     
+  pagesRead   Int      
+  currentPage Int      
+  createdAt   DateTime @default(now()) 
+
+  library     Library  @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  bookId    Int
+  rating    Int     
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // O usuário só pode avaliar o livro uma única vez
+  @@unique([userId, bookId])
+}
+
+enum ReadingStatus {
+  WANT_TO_READ  
+  READING       
+  COMPLETED     
+  DROPPED       
+}

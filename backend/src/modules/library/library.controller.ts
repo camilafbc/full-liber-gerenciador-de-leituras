@@ -3,6 +3,7 @@ import { addBook } from "./library.services";
 import { ExtendedRequest } from "../../types/extended-request";
 import { addBookSchema } from "./library.schemas";
 import { Book } from "../../types/Book";
+import { handleDatabaseError } from "../../utils/handleDBErros";
 
 export const addBookToLibrary: RequestHandler = async (req, res) => {
   try {
@@ -27,8 +28,7 @@ export const addBookToLibrary: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao adicionar livro à biblioteca: ", error);
-    return res
-      .status(500)
-      .json({ error: "Erro ao adicionar livro à biblioteca" });
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
   }
 };

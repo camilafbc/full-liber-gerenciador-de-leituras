@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../../types/User";
 import { ExtendedRequest } from "../../types/extended-request";
+import { handleDatabaseError } from "../../utils/handleDBErros";
 
 export const signUp: RequestHandler = async (req, res) => {
   try {
@@ -36,7 +37,8 @@ export const signUp: RequestHandler = async (req, res) => {
     return res.status(201).json(newUser);
   } catch (error) {
     console.error("Erro ao criar usuário: ", error);
-    return res.status(500).json({ error: "Erro ao criar usuário" });
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
   }
 };
 
@@ -69,9 +71,8 @@ export const signIn: RequestHandler = async (req, res) => {
     return res.status(200).json(token);
   } catch (error) {
     console.error("Erro ao realizar login: ", error);
-    return res
-      .status(500)
-      .json({ error: "Erro ao realizar login. Tente novamente mais tarde." });
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
   }
 };
 
@@ -92,8 +93,9 @@ export const userData: RequestHandler = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Erro ao buscar dados do usuário: ", error);
-    return res.status(500).json({ error: "Erro ao buscar dados do usuário" });
+    console.error("Erro ao buscar dados do usuário autenticado: ", error);
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
   }
 };
 
@@ -112,6 +114,7 @@ export const googleCallback: RequestHandler = async (req, res) => {
     return res.redirect(`http://localhost:3000/auth-callback?token=${token}`);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Erro interno" });
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
   }
 };
