@@ -1,4 +1,5 @@
-import { Book } from "./books.types";
+import { prisma } from "../../libs/prisma";
+import { Book } from "../../types/Book";
 
 export const searchGoogleBooks = async (
   query: string,
@@ -65,4 +66,25 @@ export const getBookFromGoogleBooks = async (
     imageUrl: data.volumeInfo.imageLinks?.thumbnail,
     isbn13: data.volumeInfo.industryIdentifiers?.[1].identifier,
   };
+};
+
+export const addBookData = async (data: Book) => {
+  const book = await prisma.book.upsert({
+    where: { externalId: data.externalId },
+    create: {
+      externalId: data.externalId,
+      title: data.title,
+      subtitle: data.subtitle || null,
+      authors: data.authors,
+      publishedDate: data.publishedDate || null,
+      description: data.description,
+      pageCount: data.pageCount ? Number(data.pageCount) : 0,
+      categories: data.categories,
+      imageUrl: data.imageUrl || null,
+      isbn13: data.isbn13 || null,
+    },
+    update: {},
+  });
+
+  return book;
 };
