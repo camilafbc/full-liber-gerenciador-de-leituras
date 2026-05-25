@@ -5,6 +5,7 @@ import authRouter from "./modules/auth/auth.routes";
 import booksRouter from "./modules/books/books.routes";
 import { libraryRouter } from "./modules/library/library.routes";
 import { ensureAuth } from "./middlewares/auth";
+import readingProgressRouter from "./modules/reading-progress/reading_progress.routes";
 
 const server = express();
 
@@ -15,6 +16,7 @@ server.use(express.json());
 server.use("/auth", authRouter);
 server.use("/books", ensureAuth, booksRouter);
 server.use("/library", ensureAuth, libraryRouter);
+server.use("/reading-progress", ensureAuth, readingProgressRouter);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
