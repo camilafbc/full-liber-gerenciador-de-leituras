@@ -2,19 +2,25 @@ import { Book } from "../../types/Book";
 import { prisma } from "../../libs/prisma";
 import { ReadingStatus } from "./library.types";
 import { addBookData } from "../books/books.services";
+import { getUserByUuid } from "../users/users.services";
 
-export const addBook = async (userId: string, data: Book) => {
+export const addBook = async (userUuid: string, data: Book) => {
   const book = await addBookData(data);
+  const user = await getUserByUuid(userUuid);
+
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
 
   return prisma.library.upsert({
     where: {
       userId_bookId: {
-        userId,
+        userId: user?.id,
         bookId: book.id,
       },
     },
     create: {
-      userId,
+      userId: user?.id,
       bookId: book.id,
       status: "WANT_TO_READ",
     },
@@ -23,16 +29,22 @@ export const addBook = async (userId: string, data: Book) => {
 };
 
 export const updateBookStatus = async (
-  userId: string,
+  userUuid: string,
   bookId: number,
   status: ReadingStatus,
 ) => {
   let finishedAt: Date | null = null;
   let currentPageUpdate: number | undefined = undefined;
 
+  const user = await getUserByUuid(userUuid);
+
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
+
   const currentLibraryItem = await prisma.library.findUnique({
     where: {
-      userId_bookId: { userId, bookId },
+      userId_bookId: { userId: user.id, bookId },
     },
     include: { book: true },
   });
@@ -47,7 +59,7 @@ export const updateBookStatus = async (
   }
 
   return prisma.library.update({
-    where: { userId_bookId: { userId, bookId } },
+    where: { userId_bookId: { userId: user.id, bookId } },
     data: {
       status,
       finishedAt,

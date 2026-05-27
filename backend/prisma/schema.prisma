@@ -34,9 +34,9 @@ model Account {
   uuid      String   @unique @default(uuid())
   provider  String
   providerAccountId String
-  userId String 
+  userId Int 
 
-  user User @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])
 
   @@map("accounts")
@@ -44,6 +44,7 @@ model Account {
 
 model Book {
   id Int @id @default(autoincrement())
+  uuid        String  @unique @default(uuid())
   externalId String @unique
   title String
   subtitle String?
@@ -64,7 +65,8 @@ model Book {
 
 model Library {
   id          Int         @id @default(autoincrement())
-  userId      String      
+  uuid        String  @unique @default(uuid())
+  userId      Int      
   bookId      Int         
   status      ReadingStatus @default(WANT_TO_READ) 
   currentPage Int         @default(0)
@@ -73,7 +75,7 @@ model Library {
   finishedAt  DateTime?
 
  
-  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   book        Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   readingLogs ReadingProgress[]
@@ -95,13 +97,13 @@ model ReadingProgress {
 
 model Review {
   id        Int      @id @default(autoincrement())
-  userId    String
+  userId    Int
   bookId    Int
   rating    Int     
   comment   String?  @db.Text
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   // O usuário só pode avaliar o livro uma única vez

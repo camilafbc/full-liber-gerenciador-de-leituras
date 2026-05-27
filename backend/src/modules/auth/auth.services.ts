@@ -26,7 +26,7 @@ export const existingAccount = async (
 };
 
 export const createAccount = async (
-  userId: string,
+  userId: number,
   provider: string,
   providerAccountId: string,
 ) => {
@@ -55,7 +55,7 @@ export const createUser = async (
     });
 
     const account = await tx.account.create({
-      data: { userId: newUser.uuid, provider, providerAccountId },
+      data: { userId: newUser.id, provider, providerAccountId },
     });
 
     return {

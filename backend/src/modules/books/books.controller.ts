@@ -32,7 +32,6 @@ export const searchBooks: RequestHandler = async (req, res) => {
 };
 
 export const getBookFromGoogle: RequestHandler = async (req, res) => {
-  console.log("PARAMS: ", req.params);
   try {
     const id = req.params.id as string;
 
