@@ -75,6 +75,14 @@ export function handleDatabaseError(error: any): {
     }
   }
 
+  // Retornos do Sistema
+  if (error instanceof Error) {
+    return {
+      status: 404,
+      message: error.message,
+    };
+  }
+
   // Fallback
   return {
     status: 500,
