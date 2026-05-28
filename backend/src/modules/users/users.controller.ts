@@ -22,14 +22,12 @@ export const updateUserData: RequestHandler = async (req, res) => {
 
     const userUpdated = await updateUser(user.uuid, data.data);
 
-    return res
-      .status(200)
-      .json({
-        message: "Dados do perfil atualizados com sucesso!",
-        data: userUpdated,
-      });
+    return res.status(200).json({
+      message: "Dados do perfil atualizados com sucesso!",
+      data: userUpdated,
+    });
   } catch (error) {
-    console.error("Erro ao adicionar livro à biblioteca: ", error);
+    console.error("Erro ao atualizar dados do usuário: ", error);
     const dbError = handleDatabaseError(error);
     return res.status(dbError.status).json({ error: dbError.message });
   }

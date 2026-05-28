@@ -49,6 +49,11 @@ export const addProgress = async (
     let newStatus = libraryItem.status;
     let finishedAt = libraryItem.finishedAt;
 
+    // atualiza status no primeiro registro de leitura
+    if (libraryItem.status === "WANT_TO_READ" && currentPage > 0) {
+      newStatus = "READING";
+    }
+    // atualiza status ao páginas lidas = páginas do livro
     if (
       currentPage >= libraryItem.book.pageCount &&
       libraryItem.book.pageCount > 0
