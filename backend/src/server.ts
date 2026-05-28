@@ -7,12 +7,15 @@ import { libraryRouter } from "./modules/library/library.routes";
 import { ensureAuth } from "./middlewares/auth";
 import readingProgressRouter from "./modules/reading-progress/reading_progress.routes";
 import { userRouter } from "./modules/users/users.routes";
+import { globalLimiter } from "./config/rateLimit";
 
 const server = express();
 
 server.use(cors());
 server.use(helmet());
 server.use(express.json());
+
+server.use(globalLimiter);
 
 server.use("/auth", authRouter);
 server.use("/books", ensureAuth, booksRouter);
