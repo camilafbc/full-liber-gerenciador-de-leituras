@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --import=tsx --watch --env-file=.env ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_ENV=test dotenv -e .env.test jest --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -28,12 +28,21 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@swc/core": "^1.15.40",
+    "@swc/jest": "^0.2.39",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/passport-local": "^1.0.38",
     "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
+    "jest": "^30.4.2",
     "prisma": "^7.8.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.22.0",
     "typescript": "^6.0.3"
   }

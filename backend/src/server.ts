@@ -15,7 +15,9 @@ server.use(cors());
 server.use(helmet());
 server.use(express.json());
 
-server.use(globalLimiter);
+if (process.env.NODE_ENV !== "test") {
+  server.use(globalLimiter);
+}
 
 server.use("/auth", authRouter);
 server.use("/books", ensureAuth, booksRouter);
@@ -24,6 +26,11 @@ server.use("/reading-progress", ensureAuth, readingProgressRouter);
 server.use("/users", ensureAuth, userRouter);
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+
+if (process.env.NODE_ENV !== "test") {
+  server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+export default server;
