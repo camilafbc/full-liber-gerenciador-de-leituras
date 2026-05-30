@@ -57,16 +57,20 @@ export const signIn: RequestHandler = async (req, res) => {
 
     const passwordCompare = await bcrypt.compare(
       data.data.password,
-      user.passwordHash,
+      user.passwordHash as string,
     );
 
     if (!passwordCompare) {
       return res.status(400).json({ error: "Usuário ou senha inválidos" });
     }
 
-    const token = jwt.sign({ uuid: user.uuid }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { uuid: user.uuid },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "7d",
+      },
+    );
 
     return res.status(200).json(token);
   } catch (error) {
@@ -107,9 +111,13 @@ export const googleCallback: RequestHandler = async (req, res) => {
       return res.status(401).json({ error: "Não autorizado" });
     }
 
-    const token = jwt.sign({ uuid: user.uuid }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { uuid: user.uuid },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "7d",
+      },
+    );
 
     return res.redirect(`http://localhost:3000/auth-callback?token=${token}`);
   } catch (error) {
