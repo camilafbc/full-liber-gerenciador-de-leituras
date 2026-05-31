@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const addProgressSchema = z.object({
-  bookId: z.number("O ID do livro é obrigatório").int().min(1),
+  bookId: z.string("O ID do livro é obrigatório").min(1),
   currentPage: z.number("A página atual é obrigatória").int().min(0),
 });
 

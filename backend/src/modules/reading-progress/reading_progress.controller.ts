@@ -8,8 +8,6 @@ export const addReadingProgress: RequestHandler = async (req, res) => {
   try {
     const userId = (req as ExtendedRequest).user.uuid;
 
-    console.log("CHEGANDO: ", req.body);
-
     if (!userId) {
       return res
         .status(401)

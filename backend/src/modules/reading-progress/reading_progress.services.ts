@@ -3,10 +3,10 @@ import { getUserByUuid } from "../users/users.services";
 
 export const addProgress = async (
   userUuid: string,
-  bookId: number,
+  bookUuid: string,
   currentPage: number,
 ) => {
-  if (!userUuid || !bookId || !currentPage) {
+  if (!userUuid || !bookUuid || !currentPage) {
     throw new Error("Parâmetros obrigatórios ausentes");
   }
 
@@ -16,10 +16,16 @@ export const addProgress = async (
     throw new Error("Usuário não encontrado");
   }
 
+  const book = await prisma.book.findUnique({ where: { uuid: bookUuid } });
+
+  if (!book) {
+    throw new Error("Livro não encontrado");
+  }
+
   return prisma.$transaction(async (tx) => {
     const libraryItem = await tx.library.findUnique({
       where: {
-        userId_bookId: { userId: user.id, bookId },
+        userId_bookId: { userId: user.id, bookId: book.id },
       },
       include: {
         book: true,
@@ -43,6 +49,10 @@ export const addProgress = async (
         libraryId: libraryItem.id,
         pagesRead,
         currentPage,
+      },
+      omit: {
+        id: true,
+        libraryId: true,
       },
     });
 
