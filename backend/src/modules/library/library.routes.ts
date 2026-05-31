@@ -6,3 +6,4 @@ export const libraryRouter = express.Router();
 libraryRouter.get("/list", LibraryController.getBooks);
 libraryRouter.post("/book", LibraryController.addBookToLibrary);
 libraryRouter.delete("/book/:bookId", LibraryController.deleteBookFromLibrary);
+libraryRouter.get("/book/:bookId", LibraryController.getBookItem);

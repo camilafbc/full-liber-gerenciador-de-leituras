@@ -79,6 +79,14 @@ export const addBook = async (userUuid: string, data: Book) => {
       status: "WANT_TO_READ",
     },
     update: {},
+    include: {
+      book: true,
+    },
+    omit: {
+      userId: true,
+      bookId: true,
+      id: true,
+    },
   });
 };
 
