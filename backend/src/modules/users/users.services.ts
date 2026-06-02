@@ -29,7 +29,7 @@ export const updateUser = async (
   }
 
   if (data.password) {
-    updateData.password = await bcrypt.hash(data.password, 10);
+    updateData.passwordHash = await bcrypt.hash(data.password, 10);
   }
 
   const updatedUser = await prisma.user.update({
