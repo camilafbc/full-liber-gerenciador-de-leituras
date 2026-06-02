@@ -28,7 +28,7 @@ passport.use(
         // E-mail cadastrado, mas não via google
         const existingEmailUser = await getUserByEmail(email);
         if (existingEmailUser) {
-          await createAccount(existingEmailUser.uuid, "google", profile.id);
+          await createAccount(existingEmailUser.id, "google", profile.id);
           return done(null, existingEmailUser);
         }
         //  Nova conta
