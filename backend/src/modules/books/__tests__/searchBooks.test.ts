@@ -28,7 +28,7 @@ describe("Módulo de Livros - Integração com Google Books", () => {
       password,
     });
 
-    token = loginResponse.body;
+    token = loginResponse.body.accessToken;
   });
 
   // Limpa todos os mocks criados após cada caso de teste

@@ -1,6 +1,12 @@
 import { RequestHandler } from "express";
 import { createUserSchema, signInSchema } from "./auth.schemas";
-import { createUser, getUserByEmail } from "./auth.services";
+import {
+  createUser,
+  findRefreshToken,
+  generateRefreshToken,
+  getUserByEmail,
+  removeRefreshToken,
+} from "./auth.services";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../../types/User";
@@ -64,15 +70,26 @@ export const signIn: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Usuário ou senha inválidos" });
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { uuid: user.uuid },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: "7d",
+        expiresIn: "15m",
       },
     );
 
-    return res.status(200).json(token);
+    const newRefreshToken = await generateRefreshToken(user.uuid);
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken: newRefreshToken,
+      user: {
+        uuid: user.uuid,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatarUrl,
+      },
+    });
   } catch (error) {
     console.error("Erro ao realizar login: ", error);
     const dbError = handleDatabaseError(error);
@@ -111,17 +128,56 @@ export const googleCallback: RequestHandler = async (req, res) => {
       return res.status(401).json({ error: "Não autorizado" });
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { uuid: user.uuid },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: "7d",
+        expiresIn: "15m",
       },
     );
 
-    return res.redirect(`http://localhost:3000/auth-callback?token=${token}`);
+    const refreshToken = await generateRefreshToken(user.uuid);
+
+    return res.redirect(
+      `http://localhost:3000/auth-callback?token=${accessToken}&refresh=${refreshToken}`,
+    );
   } catch (error) {
     console.error(error);
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
+  }
+};
+
+export const refreshSession: RequestHandler = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: "Refresh token é obrigatório!" });
+    }
+
+    const savedToken = await findRefreshToken(refreshToken);
+
+    if (!savedToken) {
+      return res.status(401).json({ error: "Refresh token inválido" });
+    }
+
+    if (new Date() > savedToken.expiresAt) {
+      await removeRefreshToken(refreshToken);
+      return res
+        .status(401)
+        .json({ error: "Refresh token expirado. Faça login novamente." });
+    }
+
+    const newAccesToken = jwt.sign(
+      { uuid: savedToken.user.uuid },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "15m" },
+    );
+
+    return res.status(200).json({ accessToken: newAccesToken });
+  } catch (error) {
+    console.error("Erro ao gerar refreshSession: ", error);
     const dbError = handleDatabaseError(error);
     return res.status(dbError.status).json({ error: dbError.message });
   }

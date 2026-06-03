@@ -29,6 +29,8 @@ describe("Módulo de Autenticação - Login (SignIn)", () => {
     });
 
     expect(response.status).toBe(200);
+    expect(response.body.accessToken).not.toBeUndefined();
+    expect(response.body.refreshToken).not.toBeUndefined();
   });
 
   it("Should not be allowed login with a different password", async () => {

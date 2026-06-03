@@ -27,7 +27,7 @@ describe("Módulo de Usuário - Rota Protegida", () => {
       password,
     });
 
-    token = loginResponse.body;
+    token = loginResponse.body.accessToken;
   });
 
   afterAll(async () => await prisma.$disconnect());

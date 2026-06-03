@@ -29,7 +29,7 @@ describe("Módulo de Biblioteca (Library) - Rotas Protegidas", () => {
       .post("/auth/signin")
       .send({ email, password });
 
-    token = loginResponse.body;
+    token = loginResponse.body.accessToken;
   });
 
   afterAll(async () => {

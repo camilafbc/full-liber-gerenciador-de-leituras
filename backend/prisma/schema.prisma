@@ -23,6 +23,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   accounts Account[]
+  refreshTokens RefreshToken[]
   libraries Library[]
   reviews Review[]
 
@@ -40,6 +41,18 @@ model Account {
   @@unique([provider, providerAccountId])
 
   @@map("accounts")
+}
+
+model RefreshToken {
+  id Int @id @default(autoincrement())
+  token String @unique
+  userId Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())  
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
 }
 
 model Book {
@@ -93,6 +106,8 @@ model ReadingProgress {
   createdAt   DateTime @default(now()) 
 
   library     Library  @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+
+  @@map("reading_progress")
 }
 
 model Review {
@@ -108,6 +123,8 @@ model Review {
 
   // O usuário só pode avaliar o livro uma única vez
   @@unique([userId, bookId])
+
+  @@map("reviews")
 }
 
 enum ReadingStatus {

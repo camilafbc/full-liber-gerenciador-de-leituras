@@ -60,7 +60,7 @@ describe("Módulo de Progresso de Leitura - Rotas Protegidas", () => {
       .post("/auth/signin")
       .send({ email, password });
 
-    token = loginResponse.body;
+    token = loginResponse.body.accessToken;
   });
 
   afterAll(async () => {

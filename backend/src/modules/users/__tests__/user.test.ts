@@ -20,8 +20,7 @@ describe("Módulo de Usuários", () => {
       email,
       password,
     });
-
-    token = loginResponse.body;
+    token = loginResponse.body.accessToken;
   });
 
   afterAll(async () => await prisma.$disconnect());

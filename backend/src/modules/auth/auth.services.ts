@@ -1,4 +1,5 @@
 import { prisma } from "../../libs/prisma";
+import { createRefreshToken } from "../../utils/createRefreshToken";
 
 export const getUserByEmail = async (email: string) => {
   const user = await prisma.user.findUnique({
@@ -58,6 +59,14 @@ export const createUser = async (
       data: { userId: newUser.id, provider, providerAccountId },
     });
 
+    const refreshToken = await tx.refreshToken.create({
+      data: {
+        userId: newUser.id,
+        token: createRefreshToken(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
     return {
       user: {
         name,
@@ -66,6 +75,40 @@ export const createUser = async (
         imageUrl: newUser.avatarUrl,
       },
       account: { uuid: account.uuid },
+      refreshToken: refreshToken.token,
     };
   });
+};
+
+export const generateRefreshToken = async (userUuid: string) => {
+  const user = await prisma.user.findUnique({
+    where: { uuid: userUuid },
+  });
+
+  if (!user) {
+    throw new Error("Usuário não identificado");
+  }
+
+  const refreshToken = await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      token: createRefreshToken(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  return refreshToken;
+};
+
+export const findRefreshToken = async (refreshToken: string) => {
+  const token = await prisma.refreshToken.findUnique({
+    where: { token: refreshToken },
+    include: { user: true },
+  });
+  return token;
+};
+
+export const removeRefreshToken = async (refreshToken: string) => {
+  await prisma.refreshToken.delete({ where: { token: refreshToken } });
+  return true;
 };

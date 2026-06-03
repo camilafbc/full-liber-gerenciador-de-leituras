@@ -19,6 +19,16 @@ jest.mock("passport", () => ({
 describe("Módulo de Autenticação - Google OAuth2 Callback", () => {
   beforeAll(async () => {
     await prisma.user.deleteMany();
+    await prisma.refreshToken.deleteMany();
+
+    await prisma.user.create({
+      data: {
+        uuid: "uuid-ficticio-do-google-123",
+        email: "google.user@example.com",
+        name: "Leitor Google",
+        passwordHash: null,
+      },
+    });
   });
 
   afterAll(async () => {
