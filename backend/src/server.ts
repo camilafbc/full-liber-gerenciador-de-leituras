@@ -8,6 +8,9 @@ import { ensureAuth } from "./middlewares/auth";
 import readingProgressRouter from "./modules/reading-progress/reading_progress.routes";
 import { userRouter } from "./modules/users/users.routes";
 import { globalLimiter } from "./config/rateLimit";
+import passport from "passport";
+
+import "./libs/passport-google-oauth20";
 
 const server = express();
 
@@ -18,6 +21,8 @@ server.use(express.json());
 if (process.env.NODE_ENV !== "test") {
   server.use(globalLimiter);
 }
+
+server.use(passport.initialize());
 
 server.use("/auth", authRouter);
 server.use("/books", ensureAuth, booksRouter);

@@ -49,6 +49,7 @@ export const signUp: RequestHandler = async (req, res) => {
 };
 
 export const signIn: RequestHandler = async (req, res) => {
+  console.log("Chegando: ", req.body);
   try {
     // Validar dados recebidos
     const data = signInSchema.safeParse(req.body);

@@ -35,6 +35,7 @@ passport.use(
         const newUser = await createUser(
           profile.displayName,
           email,
+          null,
           "google",
           profile.id,
           profile.photos?.[0].value || "",
