@@ -7,7 +7,7 @@ import { authLimiter } from "../../config/rateLimit";
 const authRouter = express.Router();
 
 authRouter.post("/signup", authLimiter, AuthController.signUp);
-authRouter.post("/signin", AuthController.signIn);
+authRouter.post("/signin", authLimiter, AuthController.signIn);
 authRouter.get("/me", ensureAuth, AuthController.userData);
 authRouter.post("/refresh", AuthController.refreshSession);
 

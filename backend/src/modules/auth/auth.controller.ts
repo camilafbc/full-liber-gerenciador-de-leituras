@@ -81,9 +81,13 @@ export const signIn: RequestHandler = async (req, res) => {
 
     const newRefreshToken = await generateRefreshToken(user.uuid);
 
+    res.cookie("liber_bk_refresh_token", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
     return res.status(200).json({
       accessToken,
-      refreshToken: newRefreshToken,
       user: {
         uuid: user.uuid,
         name: user.name,
@@ -151,10 +155,10 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
 export const refreshSession: RequestHandler = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.liber_refresh_token;
 
     if (!refreshToken) {
-      return res.status(400).json({ error: "Refresh token é obrigatório!" });
+      return res.status(401).json({ error: "Refresh token não fornecido!" });
     }
 
     const savedToken = await findRefreshToken(refreshToken);

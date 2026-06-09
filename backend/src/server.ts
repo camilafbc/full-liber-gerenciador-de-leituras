@@ -11,12 +11,14 @@ import { globalLimiter } from "./config/rateLimit";
 import passport from "passport";
 
 import "./libs/passport-google-oauth20";
+import cookieParser from "cookie-parser";
 
 const server = express();
 
 server.use(cors());
 server.use(helmet());
 server.use(express.json());
+server.use(cookieParser());
 
 if (process.env.NODE_ENV !== "test") {
   server.use(globalLimiter);
