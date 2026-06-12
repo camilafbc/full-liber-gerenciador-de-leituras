@@ -142,9 +142,8 @@ export const googleCallback: RequestHandler = async (req, res) => {
     );
 
     const refreshToken = await generateRefreshToken(user.uuid);
-
     return res.redirect(
-      `http://localhost:3000/auth-callback?token=${accessToken}&refresh=${refreshToken}`,
+      `http://localhost:3000/auth-callback?token=${accessToken}&refresh=${refreshToken.token}`,
     );
   } catch (error) {
     console.error(error);
