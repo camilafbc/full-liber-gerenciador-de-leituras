@@ -1,0 +1,145 @@
+"use client";
+
+import { Laptop, LogOut, Moon, Sun } from "lucide-react";
+import Link from "next/link";
+import { ReactNode, useState } from "react";
+import React from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "next-themes";
+
+type button = {
+  title: string;
+  icon: ReactNode;
+  href: string;
+};
+
+interface UserMenuProps {
+  avatarImage?: string;
+  // avatarFalback?: string;
+  userInfo?: boolean;
+  name?: string;
+  role?: string;
+  email?: string;
+  buttons?: button[];
+  signOutCallbackUrl?: string;
+}
+
+const icons = {
+  light: Sun,
+  dark: Moon,
+  system: Laptop,
+};
+
+export const MenuButton = ({ title, icon }: button) => {
+  const { logout } = useAuth();
+  return (
+    <Button
+      variant="ghost"
+      onClick={logout}
+      className="w-full justify-start ps-0"
+    >
+      <LogOut className="me-0.5 h-4" />
+      Sair
+    </Button>
+  );
+};
+
+export const ThemeSwitcher = ({
+  setTheme,
+}: {
+  setTheme: (theme: string) => void;
+}) => (
+  <div>
+    <p className="mb-1 text-sm font-semibold">Modo:</p>
+    {[
+      { theme: "light", icon: "light", label: "Claro" },
+      { theme: "dark", icon: "dark", label: "Escuro" },
+      { theme: "system", icon: "system", label: "Sistema" },
+    ].map((item) => {
+      const Icon = icons[item.icon as keyof typeof icons];
+      return (
+        <Button
+          key={item.theme}
+          variant="ghost"
+          onClick={() => setTheme(item.theme)}
+          className="flex w-full justify-start gap-1 p-1 hover:bg-primary/80 hover:text-white"
+        >
+          <Icon className="size-4" />
+          {item.label}
+        </Button>
+      );
+    })}
+  </div>
+);
+
+export default function UserMenu({
+  userInfo = true,
+  buttons,
+  avatarImage,
+  name,
+  email,
+  signOutCallbackUrl = "/",
+}: UserMenuProps) {
+  const { setTheme } = useTheme();
+  const [open, setOpen] = useState(false);
+  const { logout } = useAuth();
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        {/* <UserAvatar /> */}
+        <Avatar className="h-[50px] w-[50px] cursor-pointer ">
+          {avatarImage && <AvatarImage src={avatarImage} alt="profile-image" />}
+          <AvatarFallback className="bg-primary dark:bg-accent text-center text-lg font-semibold text-white">
+            {name?.split(" ")?.[0]?.[0]}
+            {name?.split(" ")?.[1]?.[0]}
+          </AvatarFallback>
+        </Avatar>
+      </PopoverTrigger>
+      <PopoverContent className="absolute right-0 w-[280px] translate-x-4">
+        {userInfo && (
+          <div key={"user-info"} className="flex flex-col gap-0">
+            <p className="text-sm font-bold">{name}</p>
+            <p className="text-xs text-muted-foreground">{email}</p>
+          </div>
+        )}
+        <Separator />
+        {buttons &&
+          buttons.map((btn, index) => (
+            <React.Fragment key={index}>
+              <Link href={btn.href}>
+                <Button
+                  variant="ghost"
+                  onClick={() => setOpen(false)}
+                  className="flex w-full justify-start gap-1 p-1 hover:bg-primary/80 hover:text-white"
+                >
+                  {btn.icon}
+                  {btn.title}
+                </Button>
+              </Link>
+            </React.Fragment>
+          ))}
+        <Separator />
+        <ThemeSwitcher setTheme={setTheme} />
+        <Separator />
+        <Button
+          variant="ghost"
+          onClick={logout}
+          className="flex w-full justify-start gap-1 p-1 hover:bg-primary/80 hover:text-white"
+        >
+          <LogOut className="size-4" />
+          Sair
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}

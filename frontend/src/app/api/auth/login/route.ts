@@ -23,10 +23,10 @@ export async function POST(request: Request) {
     }
 
     const cookieStore = await cookies();
-    const setCookieHeader = response.headers.get("liber_bk_refresh_token");
+    const setCookieHeader = response.headers.get("set-cookie");
 
     if (setCookieHeader) {
-      const match = setCookieHeader.match(/liber_refresh_token=([^;]+)/);
+      const match = setCookieHeader.match(/liber_bk_refresh_token=([^;]+)/);
       if (match && match[1]) {
         const tokenValue = match[1];
 

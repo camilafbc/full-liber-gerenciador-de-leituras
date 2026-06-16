@@ -35,6 +35,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     async function loadData() {
+      if (token && user) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
@@ -42,34 +47,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
-          setToken(refreshData);
+          const currentToken = refreshData.accessToken || refreshData;
+
+          setToken(currentToken);
 
           const me = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${currentToken}`,
             },
           });
 
-          const data = await me.json();
-          setUser(data.user);
-
-          // const meResponse = await fetch("/api/auth/me");
-
-          // if (meResponse.ok) {
-          //   const data = await meResponse.json();
-          //   setUser(data.user);
-          // }
+          if (me.ok) {
+            const data = await me.json();
+            setUser(data.user);
+          }
         }
       } catch (error) {
-        console.error("Erro ao setar sessão:", error);
+        console.error("Erro ao reidratar sessão:", error);
       } finally {
         setLoading(false);
       }
     }
 
     loadData();
-  }, []);
+  }, [token, user]);
 
   return (
     <AuthContext.Provider

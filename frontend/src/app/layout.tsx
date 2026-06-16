@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/context/authContext";
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -28,7 +30,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -39,7 +42,11 @@ export default function RootLayout({
       )}
     >
       <AuthProvider>
-        <body className="min-h-full flex flex-col">{children}</body>
+        <body className="min-h-full flex flex-col">
+          <TooltipProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </TooltipProvider>
+        </body>
       </AuthProvider>
     </html>
   );

@@ -49,7 +49,6 @@ export const signUp: RequestHandler = async (req, res) => {
 };
 
 export const signIn: RequestHandler = async (req, res) => {
-  console.log("Chegando: ", req.body);
   try {
     // Validar dados recebidos
     const data = signInSchema.safeParse(req.body);
@@ -81,7 +80,7 @@ export const signIn: RequestHandler = async (req, res) => {
 
     const newRefreshToken = await generateRefreshToken(user.uuid);
 
-    res.cookie("liber_bk_refresh_token", newRefreshToken, {
+    res.cookie("liber_bk_refresh_token", newRefreshToken.token, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
@@ -154,7 +153,7 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
 export const refreshSession: RequestHandler = async (req, res) => {
   try {
-    const refreshToken = req.cookies.liber_refresh_token;
+    const refreshToken = req.cookies.liber_bk_refresh_token;
 
     if (!refreshToken) {
       return res.status(401).json({ error: "Refresh token não fornecido!" });
