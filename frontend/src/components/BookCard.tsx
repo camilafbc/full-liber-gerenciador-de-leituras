@@ -1,10 +1,14 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { ImageNotFound } from "./ImageNotFound";
 
 interface BookCardProps {
+  index?: number;
+  externalId: string;
   title: string;
-  author?: string;
+  author?: string[];
   pages?: number;
   description?: string;
   coverUrl?: string;
@@ -13,6 +17,8 @@ interface BookCardProps {
 }
 
 export const BookCard = ({
+  index,
+  externalId,
   title,
   author,
   pages,
@@ -21,40 +27,51 @@ export const BookCard = ({
   rating,
   variant,
 }: BookCardProps) => {
+  const isPriority = index && index < 3;
+
   if (variant === "list") {
     return (
-      <Card className=" gap-4 bg-card border-border items-start">
-        <CardContent className="flex flex-col md:flex-row md:gap-4">
-          <Image
-            src={coverUrl ?? "/teste"}
-            alt={title}
-            sizes="100%"
-            width={0}
-            height={0}
-            className="w-[150px] h-full transition-transform duration-200 hover:scale-105 rounded-md"
-          />
-
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-lg text-foreground truncate">
-              {title}
-            </h3>
-            {author && (
-              <p className="text-sm text-muted-foreground">{author}</p>
-            )}
-            {pages && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {pages} páginas
-              </p>
-            )}
-            {description && (
-              <p className="text-sm text-muted-foreground mt-2 line-clamp-5">
-                {description}
-              </p>
-            )}
-            <div className="mt-4">Ver mais</div>
-          </div>
-        </CardContent>
-      </Card>
+      <Link href={`/book/${externalId}`}>
+        <Card className=" gap-4 bg-card border-border items-start overflow-hidden">
+          <CardContent className="flex flex-col md:flex-row md:gap-4">
+            <div className="relative w-[150px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md">
+              {coverUrl ? (
+                <Image
+                  src={coverUrl ?? "/teste"}
+                  alt={`Capa do livro - ${title}`}
+                  sizes="150px"
+                  fill
+                  priority={isPriority || false}
+                  className="object-cover rounded-md"
+                />
+              ) : (
+                <ImageNotFound />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-lg text-foreground line-clamp-2">
+                {title}
+              </h3>
+              {author && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {author.join(", ")}
+                </p>
+              )}
+              {pages && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {pages} páginas
+                </p>
+              )}
+              {description && (
+                <p className="text-sm text-muted-foreground mt-2 line-clamp-5 text-justify">
+                  {description}
+                </p>
+              )}
+              <div className="mt-4">Ver mais</div>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
     );
   }
 

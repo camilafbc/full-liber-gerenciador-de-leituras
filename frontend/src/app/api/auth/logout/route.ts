@@ -6,6 +6,7 @@ export async function POST() {
     const cookieStore = await cookies();
 
     cookieStore.delete("liber_refresh_token");
+    cookieStore.delete("liber_access_token");
 
     return NextResponse.json({ success: true });
   } catch (error) {

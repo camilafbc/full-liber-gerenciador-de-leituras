@@ -33,9 +33,25 @@ export async function POST() {
       );
     }
 
+    // cookieStore.set("liber_access_token", data.accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    //   maxAge: 15 * 60,
+    //   path: "/",
+    // });
+
     const response = NextResponse.json({
       success: true,
       accessToken: data.accessToken,
+    });
+
+    response.cookies.set("liber_access_token", data.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
     });
 
     return response;

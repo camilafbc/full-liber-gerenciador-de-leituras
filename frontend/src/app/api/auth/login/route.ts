@@ -37,6 +37,14 @@ export async function POST(request: Request) {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
         });
+
+        cookieStore.set("liber_access_token", data.accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 15 * 60,
+          path: "/",
+        });
       }
     }
 

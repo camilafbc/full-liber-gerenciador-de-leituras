@@ -1,15 +1,12 @@
 "use client";
 
-import { ChevronLeft, Menu, X } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useSidebarStore } from "@/stores/useSidebarStore";
 import { usePathname } from "next/navigation";
-
-// import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 type ButtonsMenu = {
   icon: ReactNode;
@@ -213,8 +210,9 @@ export default function SidebarLayout({
             {children}
           </div>
         </main>
+        {/* MENU MOBILE */}
         {isMobile && (
-          <div className="w-full h-18 border-t-2 shadow-lg fixed bottom-0 flex justify-around items-center">
+          <div className="w-full h-18 border-t-2 shadow-lg fixed bottom-0 flex justify-around items-center bg-background">
             {ButtonsMenu?.map((button, index) => {
               const isActive = pathname.startsWith(button.href);
               return (

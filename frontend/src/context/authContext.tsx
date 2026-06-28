@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import Cookies from "js-cookie";
 
 interface UserData {
   uuid: string;
@@ -19,7 +20,7 @@ interface SessionData {
   user: UserData | null;
   token: string | null;
   loading: boolean;
-  setUser: (user: UserData | null) => void;
+  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
   setToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
 }
@@ -30,7 +31,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<UserData | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    return Cookies.get("liber_access_token") || null;
+  });
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
