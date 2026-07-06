@@ -3,6 +3,7 @@ import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ImageNotFound } from "./ImageNotFound";
+import { Badge } from "./ui/badge";
 
 interface BookCardProps {
   index?: number;
@@ -13,7 +14,8 @@ interface BookCardProps {
   description?: string;
   coverUrl?: string;
   rating?: number;
-  variant: "grid" | "list";
+  categories?: string[];
+  variant: "grid" | "list" | "only";
 }
 
 export const BookCard = ({
@@ -25,6 +27,7 @@ export const BookCard = ({
   description,
   coverUrl,
   rating,
+  categories,
   variant,
 }: BookCardProps) => {
   const isPriority = index && index < 3;
@@ -42,6 +45,7 @@ export const BookCard = ({
                   sizes="150px"
                   fill
                   priority={isPriority || false}
+                  loading={isPriority ? undefined : "lazy"}
                   className="object-cover rounded-md"
                 />
               ) : (
@@ -72,6 +76,62 @@ export const BookCard = ({
           </CardContent>
         </Card>
       </Link>
+    );
+  }
+
+  if (variant === "only") {
+    return (
+      <Card className=" gap-4 bg-card border-border items-start overflow-hidden">
+        <CardContent className="flex flex-col md:flex-row md:gap-4">
+          <div className="relative w-full max-w-[250px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md">
+            {coverUrl ? (
+              <Image
+                src={coverUrl ?? "/teste"}
+                alt={`Capa do livro - ${title}`}
+                sizes="150px"
+                fill
+                priority={isPriority || false}
+                loading={isPriority ? undefined : "lazy"}
+                className="object-cover rounded-md"
+              />
+            ) : (
+              <ImageNotFound />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-lg text-foreground line-clamp-2">
+              {title}
+            </h3>
+            {author && (
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {author.join(", ")}
+              </p>
+            )}
+            {pages && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {pages} páginas
+              </p>
+            )}
+            {categories &&
+              categories.map((c, i) => (
+                <Badge key={i} className="mr-2 my-4 dark:bg-accent">
+                  {c}
+                </Badge>
+              ))}
+            {description && (
+              <div
+                className="
+                [&_p]:mb-4
+                [&_b]:font-semibold
+                [&_br]:mb-2
+              "
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            )}
+            <div className="mt-4">Ver mais</div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

@@ -31,7 +31,11 @@ export async function POST(request: Request) {
 
     const data = await me.json();
 
-    return NextResponse.json({ success: true, user: data.user });
+    return NextResponse.json({
+      success: true,
+      user: data.user,
+      accessToken: data.accessToken,
+    });
   } catch (error) {
     console.error("Erro ao criar token no login social: ", error);
     return NextResponse.json(
