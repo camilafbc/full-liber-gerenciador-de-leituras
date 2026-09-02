@@ -17,4 +17,9 @@ export const addBookSchema = z.object({
   book: bookDetailsSchema,
 });
 
+export const updateBookStatusSchema = z.object({
+  status: z.enum(["WANT_TO_READ", "READING", "COMPLETED", "DROPPED"]),
+  currentPage: z.number().int().min(0).optional(),
+});
+
 export type AddBookSchema = z.infer<typeof addBookSchema>;

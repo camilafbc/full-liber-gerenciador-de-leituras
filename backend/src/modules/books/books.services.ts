@@ -1,6 +1,7 @@
 import { googleBooksGateway } from "../../gateway/googleBooks.gateway";
 import { prisma } from "../../libs/prisma";
 import { Book } from "../../types/Book";
+import { getUserByUuid } from "../users/users.services";
 
 export const searchGoogleBooks = async (
   query: string,
@@ -14,10 +15,51 @@ export const searchGoogleBooks = async (
 
 export const getBookFromGoogleBooks = async (
   id: string,
+  userUuid: string,
 ): Promise<Omit<Book, "id" | "uuid"> | null> => {
   const book = await googleBooksGateway.getBookId(id);
 
-  return book;
+  if (!book) return null;
+
+  const user = await getUserByUuid(userUuid);
+
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
+
+  const storedBook = await prisma.book.findUnique({
+    where: { externalId: id },
+    select: { id: true, uuid: true },
+  });
+
+  const library = storedBook
+    ? await prisma.library.findUnique({
+        where: {
+          userId_bookId: { userId: user.id, bookId: storedBook.id },
+        },
+        select: {
+          id: true,
+          book: { select: { uuid: true } },
+          active: true,
+          status: true,
+          currentPage: true,
+          updatedAt: true,
+        },
+      })
+    : null;
+
+  return {
+    ...book,
+    libraryInfo: library?.active
+      ? {
+          id: library.id,
+          bookUuid: library.book.uuid,
+          status: library.status,
+          currentPage: library.currentPage,
+          updatedAt: library.updatedAt.toISOString(),
+        }
+      : null,
+  };
 };
 
 export const addBookData = async (data: Book) => {

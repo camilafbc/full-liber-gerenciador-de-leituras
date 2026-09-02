@@ -1,3 +1,11 @@
+export type LibraryInfo = {
+  id: number;
+  bookUuid: string;
+  status: "WANT_TO_READ" | "READING" | "COMPLETED" | "DROPPED";
+  currentPage: number;
+  updatedAt: string;
+};
+
 export type Book = {
   id: number;
   uuid: string;
@@ -8,7 +16,10 @@ export type Book = {
   publishedDate: string;
   description: string;
   pageCount?: string;
+  publisher?: string;
   categories: string[];
   imageUrl?: string;
   isbn13?: string;
+  isbn10?: string;
+  libraryInfo?: LibraryInfo | null;
 };

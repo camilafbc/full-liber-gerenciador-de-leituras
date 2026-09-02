@@ -16,6 +16,7 @@ interface BookCardProps {
   rating?: number;
   categories?: string[];
   variant: "grid" | "list" | "only";
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const BookCard = ({
@@ -29,12 +30,13 @@ export const BookCard = ({
   rating,
   categories,
   variant,
+  onClick,
 }: BookCardProps) => {
   const isPriority = index && index < 3;
 
   if (variant === "list") {
     return (
-      <Link href={`/book/${externalId}`}>
+      <Link href={`/book/${externalId}`} onClick={onClick}>
         <Card className=" gap-4 bg-card border-border items-start overflow-hidden">
           <CardContent className="flex flex-col md:flex-row md:gap-4">
             <div className="relative w-[150px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md">

@@ -18,8 +18,9 @@ export const listBooks = async (
 
   const skip = (page - 1) * limit;
 
-  let filters: { userId: number; status?: ReadingStatus } = {
+  let filters: { userId: number; status?: ReadingStatus; active: boolean } = {
     userId: user?.id,
+    active: true,
   };
 
   if (status) {
@@ -35,6 +36,7 @@ export const listBooks = async (
       id: true,
       bookId: true,
       userId: true,
+      active: true,
     },
     skip,
     take: limit,
@@ -44,7 +46,7 @@ export const listBooks = async (
   });
 
   const totalCount = await prisma.library.count({
-    where: { userId: user.id, status },
+    where: { userId: user.id, status, active: true },
   });
 
   const totalPages = Math.ceil(totalCount / limit);
@@ -78,7 +80,7 @@ export const addBook = async (userUuid: string, data: Book) => {
       bookId: book.id,
       status: "WANT_TO_READ",
     },
-    update: {},
+    update: { active: true },
     include: {
       book: true,
     },
@@ -102,9 +104,11 @@ export const deleteBook = async (userUuid: string, bookUuid: string) => {
     throw new Error("Livro não encontrado no catálogo global.");
   }
 
-  const libraryItem = await prisma.library.findUnique({
+  const libraryItem = await prisma.library.findFirst({
     where: {
-      userId_bookId: { userId: user.id, bookId: book.id },
+      userId: user.id,
+      bookId: book.id,
+      active: true,
     },
   });
 
@@ -112,15 +116,17 @@ export const deleteBook = async (userUuid: string, bookUuid: string) => {
     throw new Error("Este livro não foi encontrado na biblioteca do usuário.");
   }
 
-  return prisma.library.delete({
+  return prisma.library.update({
     where: { id: libraryItem.id },
+    data: { active: false },
   });
 };
 
 export const updateBookStatus = async (
   userUuid: string,
-  bookId: number,
+  bookUuid: string,
   status: ReadingStatus,
+  currentPage?: number,
 ) => {
   let finishedAt: Date | null = null;
   let currentPageUpdate: number | undefined = undefined;
@@ -131,9 +137,17 @@ export const updateBookStatus = async (
     throw new Error("Usuário não encontrado");
   }
 
-  const currentLibraryItem = await prisma.library.findUnique({
+  const book = await prisma.book.findUnique({ where: { uuid: bookUuid } });
+
+  if (!book) {
+    throw new Error("Livro não encontrado");
+  }
+
+  const currentLibraryItem = await prisma.library.findFirst({
     where: {
-      userId_bookId: { userId: user.id, bookId },
+      userId: user.id,
+      bookId: book.id,
+      active: true,
     },
     include: { book: true },
   });
@@ -145,10 +159,15 @@ export const updateBookStatus = async (
   if (status === "COMPLETED") {
     finishedAt = new Date();
     currentPageUpdate = currentLibraryItem.book.pageCount;
+  } else if (currentPage !== undefined) {
+    if (currentPage > currentLibraryItem.book.pageCount) {
+      throw new Error("A página atual não pode ultrapassar o total de páginas");
+    }
+    currentPageUpdate = currentPage;
   }
 
   return prisma.library.update({
-    where: { userId_bookId: { userId: user.id, bookId } },
+    where: { id: currentLibraryItem.id },
     data: {
       status,
       finishedAt,
@@ -169,9 +188,11 @@ export const getLibraryItem = async (userUuid: string, bookUuid: string) => {
     throw new Error("Livro não encontrado.");
   }
 
-  const libraryItem = await prisma.library.findUnique({
+  const libraryItem = await prisma.library.findFirst({
     where: {
-      userId_bookId: { userId: user.id, bookId: book.id },
+      userId: user.id,
+      bookId: book.id,
+      active: true,
     },
     include: {
       book: true,
@@ -180,6 +201,7 @@ export const getLibraryItem = async (userUuid: string, bookUuid: string) => {
       id: true,
       bookId: true,
       userId: true,
+      active: true,
     },
   });
 

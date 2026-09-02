@@ -6,6 +6,7 @@ import { useAuthContext } from "@/context/authContext";
 import { Book } from "@/types/Book";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BookDetailsSheet } from "./BookDetailsSheet";
 
 interface SearchResultProps {
   query: string;
@@ -21,6 +22,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   // Guarda a página atual SEM causar re-render (evita loop com o observer)
   const pageRef = useRef(1);
@@ -124,6 +126,10 @@ export const SearchResults = ({ query }: SearchResultProps) => {
           description={book?.description}
           coverUrl={book?.imageUrl}
           variant="list"
+          onClick={(event) => {
+            event.preventDefault();
+            setSelectedBook(book);
+          }}
         />
       ))}
 
@@ -139,6 +145,21 @@ export const SearchResults = ({ query }: SearchResultProps) => {
           </div>
         )}
       </div>
+      <BookDetailsSheet
+        book={selectedBook}
+        open={selectedBook !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBook(null);
+        }}
+        onUpdated={(updatedBook) => {
+          setSelectedBook(updatedBook);
+          setBooks((currentBooks) =>
+            currentBooks.map((item) =>
+              item.externalId === updatedBook.externalId ? updatedBook : item,
+            ),
+          );
+        }}
+      />
     </div>
   );
 };

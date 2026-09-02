@@ -15,13 +15,18 @@ import cookieParser from "cookie-parser";
 
 const server = express();
 
-server.use(cors());
+server.use(
+  cors({
+    origin: process.env.ACCESS_URL,
+    credentials: true,
+  }),
+);
 server.use(helmet());
 server.use(express.json());
 server.use(cookieParser());
 
 if (process.env.NODE_ENV !== "test") {
-  server.use(globalLimiter);
+  // server.use(globalLimiter);
 }
 
 server.use(passport.initialize());

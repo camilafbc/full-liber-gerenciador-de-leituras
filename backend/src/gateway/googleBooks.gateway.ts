@@ -6,9 +6,27 @@ interface GoogleBooksData {
   publishedDate: string;
   description: string;
   pageCount: string;
+  publisher?: string;
   categories: string[];
   imageUrl?: string;
   isbn13?: string;
+  isbn10?: string;
+}
+
+interface GoogleBookItem {
+  id: string;
+  volumeInfo: {
+    title: string;
+    subtitle?: string;
+    authors: string[];
+    publishedDate: string;
+    description: string;
+    pageCount: string;
+    publisher?: string;
+    categories: string[];
+    imageLinks?: { thumbnail?: string };
+    industryIdentifiers?: { type: string; identifier: string }[];
+  };
 }
 
 export const googleBooksGateway = {
@@ -29,11 +47,14 @@ export const googleBooksGateway = {
       throw new Error("Falha ao buscar livros na API do Google");
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as {
+      items?: GoogleBookItem[];
+      totalItems?: number;
+    };
 
     if (!data) return { totalItems: 0, books: [] };
 
-    const books = data.items.map((item) => ({
+    const books = (data.items ?? []).map((item: GoogleBookItem) => ({
       externalId: item.id,
       authors: item.volumeInfo.authors,
       title: item.volumeInfo.title,
@@ -41,9 +62,15 @@ export const googleBooksGateway = {
       publishedDate: item.volumeInfo.publishedDate,
       description: item.volumeInfo.description,
       pageCount: item.volumeInfo.pageCount,
+      publisher: item.volumeInfo.publisher,
       categories: item.volumeInfo.categories,
       imageUrl: item.volumeInfo.imageLinks?.thumbnail,
-      isbn13: item.volumeInfo.industryIdentifiers?.[1]?.identifier,
+      isbn13: item.volumeInfo.industryIdentifiers?.find(
+        (identifier) => identifier.type === "ISBN_13",
+      )?.identifier,
+      isbn10: item.volumeInfo.industryIdentifiers?.find(
+        (identifier) => identifier.type === "ISBN_10",
+      )?.identifier,
     }));
 
     return { totalItems: data.totalItems || 0, books };
@@ -59,7 +86,7 @@ export const googleBooksGateway = {
       throw new Error("Erro ao buscar livro");
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GoogleBookItem;
 
     if (!data) return null;
 
@@ -71,9 +98,15 @@ export const googleBooksGateway = {
       publishedDate: data.volumeInfo.publishedDate,
       description: data.volumeInfo.description,
       pageCount: data.volumeInfo.pageCount,
+      publisher: data.volumeInfo.publisher,
       categories: data.volumeInfo.categories,
       imageUrl: data.volumeInfo.imageLinks?.thumbnail,
-      isbn13: data.volumeInfo.industryIdentifiers?.[1].identifier,
+      isbn13: data.volumeInfo.industryIdentifiers?.find(
+        (identifier) => identifier.type === "ISBN_13",
+      )?.identifier,
+      isbn10: data.volumeInfo.industryIdentifiers?.find(
+        (identifier) => identifier.type === "ISBN_10",
+      )?.identifier,
     };
   },
 };

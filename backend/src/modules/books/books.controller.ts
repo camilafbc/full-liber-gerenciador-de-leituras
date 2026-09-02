@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { getBookFromGoogleBooks, searchGoogleBooks } from "./books.services";
+import { ExtendedRequest } from "../../types/extended-request";
 
 export const searchBooks: RequestHandler = async (req, res) => {
   try {
@@ -33,7 +34,12 @@ export const searchBooks: RequestHandler = async (req, res) => {
 
 export const getBookFromGoogle: RequestHandler = async (req, res) => {
   try {
+    const user = (req as ExtendedRequest).user;
     const id = req.params.id as string;
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não identificado" });
+    }
 
     if (!id) {
       return res.status(400).json({
@@ -41,7 +47,7 @@ export const getBookFromGoogle: RequestHandler = async (req, res) => {
       });
     }
 
-    const book = await getBookFromGoogleBooks(id);
+    const book = await getBookFromGoogleBooks(id, user.uuid);
 
     return res.status(200).json(book);
   } catch (error) {

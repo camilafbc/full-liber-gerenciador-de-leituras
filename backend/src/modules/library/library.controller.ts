@@ -6,10 +6,11 @@ import {
   listBooks,
 } from "./library.services";
 import { ExtendedRequest } from "../../types/extended-request";
-import { addBookSchema } from "./library.schemas";
+import { addBookSchema, updateBookStatusSchema } from "./library.schemas";
 import { Book } from "../../types/Book";
 import { handleDatabaseError } from "../../utils/handleDBErros";
 import { ReadingStatus } from "./library.types";
+import { updateBookStatus } from "./library.services";
 
 export const getBooks: RequestHandler = async (req, res) => {
   try {
@@ -103,6 +104,36 @@ export const deleteBookFromLibrary: RequestHandler = async (req, res) => {
     return res.status(200).json({ message: "Livro removido com sucesso!" });
   } catch (error) {
     console.error("Erro ao remover livro da biblioteca: ", error);
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
+  }
+};
+
+export const updateBookStatusInLibrary: RequestHandler = async (req, res) => {
+  try {
+    const user = (req as ExtendedRequest).user;
+    const bookUuid = req.params.bookId as string;
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não identificado" });
+    }
+
+    const data = updateBookStatusSchema.safeParse(req.body);
+
+    if (!data.success) {
+      return res.status(400).json({ error: data.error.flatten().fieldErrors });
+    }
+
+    const item = await updateBookStatus(
+      user.uuid,
+      bookUuid,
+      data.data.status as ReadingStatus,
+      data.data.currentPage,
+    );
+
+    return res.status(200).json(item);
+  } catch (error) {
+    console.error("Erro ao atualizar status do livro: ", error);
     const dbError = handleDatabaseError(error);
     return res.status(dbError.status).json({ error: dbError.message });
   }

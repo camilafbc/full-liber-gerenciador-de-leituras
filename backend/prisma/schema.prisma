@@ -81,6 +81,7 @@ model Library {
   uuid        String  @unique @default(uuid())
   userId      Int      
   bookId      Int         
+  active      Boolean     @default(true)
   status      ReadingStatus @default(WANT_TO_READ) 
   currentPage Int         @default(0)
   addedAt     DateTime    @default(now())

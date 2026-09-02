@@ -26,6 +26,7 @@ export const addProgress = async (
     const libraryItem = await tx.library.findUnique({
       where: {
         userId_bookId: { userId: user.id, bookId: book.id },
+        active: true,
       },
       include: {
         book: true,
