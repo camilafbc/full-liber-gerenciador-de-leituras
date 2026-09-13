@@ -6,6 +6,12 @@ export type LibraryInfo = {
   updatedAt: string;
 };
 
+export type BookReview = {
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+};
+
 export type Book = {
   id: number;
   uuid: string;
@@ -22,4 +28,5 @@ export type Book = {
   isbn13?: string;
   isbn10?: string;
   libraryInfo?: LibraryInfo | null;
+  review?: BookReview | null;
 };

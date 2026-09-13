@@ -4,13 +4,18 @@ import {
   deleteBook,
   getLibraryItem,
   listBooks,
+  saveReview,
+  updateBookStatus,
 } from "./library.services";
 import { ExtendedRequest } from "../../types/extended-request";
-import { addBookSchema, updateBookStatusSchema } from "./library.schemas";
+import {
+  addBookSchema,
+  reviewSchema,
+  updateBookStatusSchema,
+} from "./library.schemas";
 import { Book } from "../../types/Book";
 import { handleDatabaseError } from "../../utils/handleDBErros";
 import { ReadingStatus } from "./library.types";
-import { updateBookStatus } from "./library.services";
 
 export const getBooks: RequestHandler = async (req, res) => {
   try {
@@ -134,6 +139,36 @@ export const updateBookStatusInLibrary: RequestHandler = async (req, res) => {
     return res.status(200).json(item);
   } catch (error) {
     console.error("Erro ao atualizar status do livro: ", error);
+    const dbError = handleDatabaseError(error);
+    return res.status(dbError.status).json({ error: dbError.message });
+  }
+};
+
+export const saveBookReview: RequestHandler = async (req, res) => {
+  try {
+    const user = (req as ExtendedRequest).user;
+    const bookUuid = req.params.bookId as string;
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não identificado" });
+    }
+
+    const data = reviewSchema.safeParse(req.body);
+
+    if (!data.success) {
+      return res.status(400).json({ error: data.error.flatten().fieldErrors });
+    }
+
+    const review = await saveReview(
+      user.uuid,
+      bookUuid,
+      data.data.rating,
+      data.data.comment,
+    );
+
+    return res.status(200).json(review);
+  } catch (error) {
+    console.error("Erro ao salvar avaliação do livro: ", error);
     const dbError = handleDatabaseError(error);
     return res.status(dbError.status).json({ error: dbError.message });
   }

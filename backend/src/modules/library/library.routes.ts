@@ -11,3 +11,4 @@ libraryRouter.patch(
   "/book/:bookId/status",
   LibraryController.updateBookStatusInLibrary,
 );
+libraryRouter.put("/book/:bookId/review", LibraryController.saveBookReview);

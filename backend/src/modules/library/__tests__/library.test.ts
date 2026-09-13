@@ -105,6 +105,93 @@ describe("Módulo de Biblioteca (Library) - Rotas Protegidas", () => {
     });
   });
 
+  describe("PATCH /library/book/:bookId/status", () => {
+    it("Should record reading progress when the current page advances", async () => {
+      const response = await request(server)
+        .patch(`/library/book/${bookIdMock}/status`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "READING", currentPage: 50 });
+
+      expect(response.status).toBe(200);
+
+      const progress = await prisma.readingProgress.findFirst({
+        where: { currentPage: 50 },
+      });
+
+      expect(progress).toEqual(
+        expect.objectContaining({
+          currentPage: 50,
+          pagesRead: 50,
+        }),
+      );
+    });
+
+    it("Should force the total page and completed status", async () => {
+      const response = await request(server)
+        .patch(`/library/book/${bookIdMock}/status`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "COMPLETED", currentPage: 10 });
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe("COMPLETED");
+      expect(response.body.currentPage).toBe(368);
+    });
+  });
+
+  describe("PUT /library/book/:bookId/review", () => {
+    it("Should reject a review when the book is not completed", async () => {
+      await request(server)
+        .patch(`/library/book/${bookIdMock}/status`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "READING", currentPage: 50 });
+
+      const response = await request(server)
+        .put(`/library/book/${bookIdMock}/review`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ rating: 5, comment: "Ainda estou lendo" });
+
+      expect(response.status).toBe(404);
+    });
+
+    it("Should create and update a review after completing the book", async () => {
+      await request(server)
+        .patch(`/library/book/${bookIdMock}/status`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "COMPLETED" });
+
+      const createResponse = await request(server)
+        .put(`/library/book/${bookIdMock}/review`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ rating: 4, comment: "Boa leitura" });
+
+      expect(createResponse.status).toBe(200);
+      expect(createResponse.body).toMatchObject({
+        rating: 4,
+        comment: "Boa leitura",
+      });
+
+      const updateResponse = await request(server)
+        .put(`/library/book/${bookIdMock}/review`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ rating: 5, comment: "Excelente leitura" });
+
+      expect(updateResponse.status).toBe(200);
+      expect(updateResponse.body).toMatchObject({
+        rating: 5,
+        comment: "Excelente leitura",
+      });
+
+      const reviews = await prisma.review.findMany({
+        where: {
+          userId: (
+            await prisma.user.findUniqueOrThrow({ where: { uuid: userUuid } })
+          ).id,
+        },
+      });
+      expect(reviews).toHaveLength(1);
+    });
+  });
+
   //  3 - BUSCA UM LIVRO DA BIBLIOTECA
 
   describe("GET /library/:bookId", () => {

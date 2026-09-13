@@ -48,6 +48,16 @@ export const getBookFromGoogleBooks = async (
       })
     : null;
 
+  const review =
+    storedBook && library?.active
+      ? await prisma.review.findUnique({
+          where: {
+            userId_bookId: { userId: user.id, bookId: storedBook.id },
+          },
+          select: { rating: true, comment: true, createdAt: true },
+        })
+      : null;
+
   return {
     ...book,
     libraryInfo: library?.active
@@ -57,6 +67,13 @@ export const getBookFromGoogleBooks = async (
           status: library.status,
           currentPage: library.currentPage,
           updatedAt: library.updatedAt.toISOString(),
+        }
+      : null,
+    review: review
+      ? {
+          rating: review.rating,
+          comment: review.comment,
+          createdAt: review.createdAt.toISOString(),
         }
       : null,
   };

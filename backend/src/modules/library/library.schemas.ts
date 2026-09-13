@@ -22,4 +22,9 @@ export const updateBookStatusSchema = z.object({
   currentPage: z.number().int().min(0).optional(),
 });
 
+export const reviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(5000).nullable().optional(),
+});
+
 export type AddBookSchema = z.infer<typeof addBookSchema>;

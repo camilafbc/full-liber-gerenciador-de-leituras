@@ -1,4 +1,4 @@
-import { Book, ReadingStatus } from "@/types/Book";
+import { Book, LibraryBook, ReadingStatus } from "@/types/Book";
 import { apiFetchClient } from "./client";
 
 // export const searchBooks = async (
@@ -47,6 +47,29 @@ export const searchBooks = async (
 
   if (!response.ok) throw new Error("Falha ao buscar livros");
 
+  return response.json();
+};
+
+export const getLibraryBooks = async (
+  token: string,
+  page = 1,
+  limit = 50,
+): Promise<{
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  books: LibraryBook[];
+}> => {
+  const response = await apiFetchClient(
+    `/library/list?page=${page}&limit=${limit}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+
+  if (!response.ok) throw new Error("Falha ao carregar a biblioteca");
   return response.json();
 };
 
@@ -100,6 +123,22 @@ export const removeBookFromLibrary = async (
   });
 
   if (!response.ok) throw new Error("Falha ao remover o livro");
+};
+
+export const saveBookReview = async (
+  bookUuid: string,
+  rating: number,
+  comment: string,
+  token: string,
+) => {
+  const response = await apiFetchClient(`/library/book/${bookUuid}/review`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ rating, comment: comment || null }),
+  });
+
+  if (!response.ok) throw new Error("Falha ao salvar a avaliação");
+  return response.json();
 };
 
 // export const getBook = async (

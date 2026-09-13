@@ -30,7 +30,18 @@ export const listBooks = async (
   const books = await prisma.library.findMany({
     where: filters,
     include: {
-      book: true,
+      book: {
+        include: {
+          reviews: {
+            where: { userId: user.id },
+            select: {
+              rating: true,
+              comment: true,
+              createdAt: true,
+            },
+          },
+        },
+      },
     },
     omit: {
       id: true,
@@ -56,7 +67,20 @@ export const listBooks = async (
     totalPages,
     currentPage: page,
     limit,
-    books,
+    books: books.map(({ book, ...libraryItem }) => ({
+      ...libraryItem,
+      book: {
+        ...book,
+        review: book.reviews[0]
+          ? {
+              rating: book.reviews[0].rating,
+              comment: book.reviews[0].comment,
+              createdAt: book.reviews[0].createdAt.toISOString(),
+            }
+          : null,
+        reviews: undefined,
+      },
+    })),
   };
 };
 
@@ -128,9 +152,6 @@ export const updateBookStatus = async (
   status: ReadingStatus,
   currentPage?: number,
 ) => {
-  let finishedAt: Date | null = null;
-  let currentPageUpdate: number | undefined = undefined;
-
   const user = await getUserByUuid(userUuid);
 
   if (!user) {
@@ -156,23 +177,85 @@ export const updateBookStatus = async (
     throw new Error("Este livro não está na biblioteca do usuário");
   }
 
-  if (status === "COMPLETED") {
-    finishedAt = new Date();
-    currentPageUpdate = currentLibraryItem.book.pageCount;
-  } else if (currentPage !== undefined) {
-    if (currentPage > currentLibraryItem.book.pageCount) {
-      throw new Error("A página atual não pode ultrapassar o total de páginas");
-    }
-    currentPageUpdate = currentPage;
+  const pageCount = currentLibraryItem.book.pageCount;
+  const currentPageUpdate =
+    status === "COMPLETED"
+      ? pageCount
+      : (currentPage ?? currentLibraryItem.currentPage);
+
+  if (pageCount > 0 && currentPageUpdate > pageCount) {
+    throw new Error("A página atual não pode ultrapassar o total de páginas");
   }
 
-  return prisma.library.update({
-    where: { id: currentLibraryItem.id },
-    data: {
-      status,
-      finishedAt,
-      currentPage: currentPageUpdate,
+  const reachesEnd = pageCount > 0 && currentPageUpdate >= pageCount;
+  const nextStatus = reachesEnd ? "COMPLETED" : status;
+  const finishedAt = nextStatus === "COMPLETED" ? new Date() : null;
+
+  return prisma.$transaction(async (tx) => {
+    if (
+      currentPageUpdate !== undefined &&
+      currentPageUpdate > currentLibraryItem.currentPage
+    ) {
+      await tx.readingProgress.create({
+        data: {
+          libraryId: currentLibraryItem.id,
+          pagesRead: currentPageUpdate - currentLibraryItem.currentPage,
+          currentPage: currentPageUpdate,
+        },
+      });
+    }
+
+    return tx.library.update({
+      where: { id: currentLibraryItem.id },
+      data: {
+        status: nextStatus,
+        finishedAt,
+        currentPage: currentPageUpdate,
+      },
+    });
+  });
+};
+
+export const saveReview = async (
+  userUuid: string,
+  bookUuid: string,
+  rating: number,
+  comment?: string | null,
+) => {
+  const user = await getUserByUuid(userUuid);
+
+  if (!user) {
+    throw new Error("Usuário não encontrado");
+  }
+
+  const book = await prisma.book.findUnique({ where: { uuid: bookUuid } });
+
+  if (!book) {
+    throw new Error("Livro não encontrado");
+  }
+
+  const libraryItem = await prisma.library.findFirst({
+    where: { userId: user.id, bookId: book.id, active: true },
+  });
+
+  if (!libraryItem) {
+    throw new Error("Este livro não está na biblioteca do usuário");
+  }
+
+  if (libraryItem.status !== "COMPLETED") {
+    throw new Error("A avaliação só pode ser feita após concluir o livro");
+  }
+
+  return prisma.review.upsert({
+    where: { userId_bookId: { userId: user.id, bookId: book.id } },
+    create: {
+      userId: user.id,
+      bookId: book.id,
+      rating,
+      comment: comment || null,
     },
+    update: { rating, comment: comment || null },
+    select: { rating: true, comment: true, createdAt: true },
   });
 };
 

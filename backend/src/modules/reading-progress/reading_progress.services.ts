@@ -6,7 +6,7 @@ export const addProgress = async (
   bookUuid: string,
   currentPage: number,
 ) => {
-  if (!userUuid || !bookUuid || !currentPage) {
+  if (!userUuid || !bookUuid || currentPage < 0) {
     throw new Error("Parâmetros obrigatórios ausentes");
   }
 
@@ -23,9 +23,10 @@ export const addProgress = async (
   }
 
   return prisma.$transaction(async (tx) => {
-    const libraryItem = await tx.library.findUnique({
+    const libraryItem = await tx.library.findFirst({
       where: {
-        userId_bookId: { userId: user.id, bookId: book.id },
+        userId: user.id,
+        bookId: book.id,
         active: true,
       },
       include: {
@@ -37,41 +38,33 @@ export const addProgress = async (
       throw new Error("Este livro não está adicionado à biblioteca do usuário");
     }
 
-    const pagesRead = currentPage - libraryItem.currentPage;
-
-    if (currentPage <= libraryItem.currentPage) {
-      throw new Error(
-        "A nova página atual deve ser maior do que a página registrada anteriormente.",
-      );
-    }
-
-    const progress = await tx.readingProgress.create({
-      data: {
-        libraryId: libraryItem.id,
-        pagesRead,
-        currentPage,
-      },
-      omit: {
-        id: true,
-        libraryId: true,
-      },
-    });
-
-    let newStatus = libraryItem.status;
-    let finishedAt = libraryItem.finishedAt;
-
-    // atualiza status no primeiro registro de leitura
-    if (libraryItem.status === "WANT_TO_READ" && currentPage > 0) {
-      newStatus = "READING";
-    }
-    // atualiza status ao páginas lidas = páginas do livro
     if (
-      currentPage >= libraryItem.book.pageCount &&
-      libraryItem.book.pageCount > 0
+      libraryItem.book.pageCount > 0 &&
+      currentPage > libraryItem.book.pageCount
     ) {
-      newStatus = "COMPLETED";
-      finishedAt = new Date();
+      throw new Error("A página atual não pode ultrapassar o total de páginas");
     }
+
+    const progress =
+      currentPage > libraryItem.currentPage
+        ? await tx.readingProgress.create({
+            data: {
+              libraryId: libraryItem.id,
+              pagesRead: currentPage - libraryItem.currentPage,
+              currentPage,
+            },
+            omit: { id: true, libraryId: true },
+          })
+        : null;
+
+    const newStatus =
+      libraryItem.book.pageCount > 0 &&
+      currentPage >= libraryItem.book.pageCount
+        ? "COMPLETED"
+        : currentPage > 0
+          ? "READING"
+          : "WANT_TO_READ";
+    const finishedAt = newStatus === "COMPLETED" ? new Date() : null;
 
     await tx.library.update({
       where: { id: libraryItem.id },
