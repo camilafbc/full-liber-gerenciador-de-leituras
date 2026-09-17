@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addBookToLibrary,
   getBook,
   removeBookFromLibrary,
   saveBookReview,
@@ -16,6 +17,14 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuthContext } from "@/context/authContext";
 import { Book, ReadingStatus } from "@/types/Book";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +40,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const statusLabels: Record<ReadingStatus, string> = {
@@ -114,6 +123,20 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
       await refresh();
     } catch {
       setError("Não foi possível salvar a avaliação.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addToLibrary = async () => {
+    if (!token) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await addBookToLibrary(book, token);
+      await refresh();
+    } catch {
+      setError("Não foi possível adicionar o livro à biblioteca.");
     } finally {
       setSaving(false);
     }
@@ -344,17 +367,29 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
                   <FieldLabel htmlFor="status" className="text-xs font-medium">
                     Status da leitura
                   </FieldLabel>
-                  <select
-                    id="status"
-                    className="mt-1 flex h-9 w-full rounded-md border bg-background px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    {...form.register("status")}
-                  >
-                    {Object.entries(statusLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="status" className="mt-1">
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(statusLabels).map(
+                            ([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </Field>
 
                 {error && <p className="text-xs text-destructive">{error}</p>}
@@ -405,13 +440,13 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
                     })}
                   </div>
 
-                  <textarea
+                  <Textarea
                     value={comment}
                     onChange={(event) => setComment(event.target.value)}
                     rows={3}
                     maxLength={5000}
                     placeholder="Escreva sua opinião rápida..."
-                    className="w-full resize-none rounded-md border bg-background p-2.5 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="min-h-20 resize-none text-xs"
                   />
 
                   <Button

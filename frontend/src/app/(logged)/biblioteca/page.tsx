@@ -1,8 +1,7 @@
 "use client";
 
 import { getLibraryBooks } from "@/api/books";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuthContext } from "@/context/authContext";
 import { LibraryBook } from "@/types/Book";
 import { BookOpen, Loader2, Star } from "lucide-react";
@@ -10,12 +9,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const statusLabels = {
-  WANT_TO_READ: "Quero ler",
-  READING: "Lendo",
-  COMPLETED: "Concluído",
-  DROPPED: "Abandonei",
-} as const;
+// const statusLabels = {
+//   WANT_TO_READ: "Quero ler",
+//   READING: "Lendo",
+//   COMPLETED: "Concluído",
+//   DROPPED: "Abandonei",
+// } as const;
 
 function RatingStars({ rating }: { rating?: number }) {
   return (
@@ -50,14 +49,14 @@ function LibraryCard({ item }: { item: LibraryBook }) {
   return (
     <Link href={`/book/${book.externalId}`} className="group block h-full">
       <Card className="flex h-full flex-col overflow-hidden border-border transition-shadow duration-200 group-hover:shadow-md">
-        <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">
+        <div className="relative aspect-2/3 w-full max-w-42 overflow-hidden bg-muted mx-auto rounded-md">
           {book.imageUrl ? (
             <Image
               src={book.imageUrl}
               alt={`Capa de ${book.title}`}
               fill
               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-300 group-hover:scale-105 "
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -65,25 +64,23 @@ function LibraryCard({ item }: { item: LibraryBook }) {
             </div>
           )}
         </div>
-        <CardContent className="flex flex-1 flex-col gap-2 p-4">
-          <div className="flex items-start justify-between gap-2">
+        <CardContent className="flex flex-1 flex-col gap-2">
+          <div className="flex flex-col items-start justify-between gap-4">
             <h2 className="line-clamp-2 font-semibold leading-tight">
               {book.title}
             </h2>
-            <Badge variant="secondary" className="shrink-0 text-[10px]">
+            {/* <Badge variant="secondary" className="shrink-0 text-[10px]">
               {statusLabels[item.status]}
-            </Badge>
-          </div>
-          <p className="line-clamp-1 text-sm text-muted-foreground">
-            {book.authors?.join(", ") || "Autor desconhecido"}
-          </p>
-          <div className="mt-auto pt-2">
+            </Badge> */}
             <RatingStars rating={book.review?.rating} />
+            {/* <Badge variant="secondary" className="shrink-0 text-[10px]">
+              {statusLabels[item.status]}
+            </Badge> */}
           </div>
+          {/* <p className="line-clamp-1 text-sm text-muted-foreground">
+            {book.authors?.join(", ") || "Autor desconhecido"}
+          </p> */}
         </CardContent>
-        <CardFooter className="border-t px-4 py-3 text-xs text-muted-foreground">
-          {item.currentPage}/{book.pageCount || "?"} páginas
-        </CardFooter>
       </Card>
     </Link>
   );
@@ -138,7 +135,7 @@ export default function BibliotecaPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {books.map((item) => (
             <LibraryCard
               key={item.book.uuid ?? item.book.externalId}
