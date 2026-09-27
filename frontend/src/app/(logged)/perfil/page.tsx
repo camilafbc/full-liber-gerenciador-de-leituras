@@ -1,6 +1,14 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { getUser } from "@/api/user";
+import { PageHeader } from "@/components/PageHeader";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { FormProfile } from "./components/FormProfile";
@@ -13,25 +21,37 @@ export default async function ProfilePage() {
 
   const { user } = await getUser(token);
 
+  const initials =
+    `${user.name?.split(" ")?.[0]?.[0] ?? ""}${user.name?.split(" ")?.[1]?.[0] ?? ""}`.toUpperCase();
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Avatar className="size-16">
-            <AvatarFallback className="bg-primary dark:bg-accent text-white text-xl font-bold tracking-wider ">
-              {user.name?.split(" ")?.[0]?.[0]?.toUpperCase()}
-              {user.name?.split(" ")?.[1]?.[0]?.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col justify-start">
-            <p className="font-bold capitalize">{user.name}</p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+    <section className="flex w-full flex-col gap-6">
+      <PageHeader
+        title="Meu perfil"
+        description="Gerencie suas informações pessoais e credenciais de acesso."
+      />
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <Avatar className="size-16">
+              <AvatarFallback className="bg-primary text-lg font-bold tracking-wider text-primary-foreground dark:bg-accent dark:text-accent-foreground">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <CardTitle className="truncate capitalize">{user.name}</CardTitle>
+              <CardDescription className="truncate">
+                {user.email}
+              </CardDescription>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <FormProfile defaultValues={user} token={token} />
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <Separator />
+        <CardContent className="pt-6">
+          <FormProfile defaultValues={user} token={token} />
+        </CardContent>
+      </Card>
+    </section>
   );
 }

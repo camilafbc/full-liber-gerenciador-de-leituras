@@ -1,8 +1,10 @@
 "use client";
 
 import { addBookToLibrary, getBook } from "@/api/books";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { useAuthContext } from "@/context/authContext";
 import { Book, ReadingStatus } from "@/types/Book";
+import { formatDate } from "@/utils/formatDatet";
 import { Loader2, Plus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -116,7 +119,7 @@ export function BookDetailsSheet({
               <div className="flex flex-col gap-6">
                 {book.description && (
                   <div
-                    className="text-sm leading-6 text-muted-foreground"
+                    className="text-sm leading-6 text-muted-foreground text-justify"
                     dangerouslySetInnerHTML={{ __html: book.description }}
                   />
                 )}
@@ -139,7 +142,7 @@ export function BookDetailsSheet({
                           Publicação
                         </dt>
                         <dd className="mt-0.5 font-medium">
-                          {book.publishedDate}
+                          {formatDate(book.publishedDate)}
                         </dd>
                       </div>
                     )}
@@ -161,30 +164,42 @@ export function BookDetailsSheet({
                     )}
                   </dl>
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
 
                 {!libraryInfo ? (
                   <Button
                     onClick={addToLibrary}
                     disabled={saving}
-                    className="w-full"
+                    className="w-full dark:bg-accent"
                   >
                     <Plus />
                     {saving ? "Adicionando..." : "Adicionar à Minha Biblioteca"}
                   </Button>
                 ) : (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between gap-3">
-                      <Badge>{statusLabels[libraryInfo.status]}</Badge>
+                      <Badge variant="secondary">
+                        {statusLabels[libraryInfo.status]}
+                      </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {libraryInfo.currentPage}/{pageCount || "?"} páginas (
-                        {Math.round(progress)}%)
+                        {libraryInfo.currentPage}/{pageCount || "?"} páginas
                       </span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Progresso</span>
+                        <span>{Math.round(progress)}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
                     </div>
                     <Button
                       onClick={() => router.push(`/books/${book.externalId}`)}
                     >
-                      Acessar Gerenciador de Leitura →
+                      Acessar gerenciador de leitura
                     </Button>
                   </div>
                 )}

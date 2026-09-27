@@ -7,7 +7,6 @@ import { useAuthContext } from "@/context/authContext";
 import {
   BookSearchIcon,
   House,
-  LayoutDashboard,
   LibraryBigIcon,
   Settings,
   UserRoundIcon,
@@ -48,19 +47,7 @@ export default function Layout({ children }: Props) {
     <SidebarLayout
       key={"sidebarlayout"}
       headerTitle={`Olá, ${user?.name}!`}
-      userMenu={
-        <UserMenu
-          name={user?.name}
-          email={user?.email}
-          buttons={[
-            {
-              icon: <Settings size={18} />,
-              title: "Configurações",
-              href: "/admin/configuracoes",
-            },
-          ]}
-        />
-      }
+      userMenu={<UserMenu name={user?.name} email={user?.email} buttons={[]} />}
       logo={<TextLogo width={83} className="fill-white" />}
       ButtonsMenu={menuButtons}
     >

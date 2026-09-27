@@ -2,9 +2,12 @@
 
 import { searchBooks } from "@/api/books";
 import { BookCard } from "@/components/BookCard";
+import { EmptyState } from "@/components/EmptyState";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthContext } from "@/context/authContext";
 import { Book } from "@/types/Book";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, BookOpen, Loader2, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookDetailsSheet } from "./BookDetailsSheet";
 
@@ -91,29 +94,60 @@ export const SearchResults = ({ query }: SearchResultProps) => {
 
   // ─── Renders ─────────────────────────────────────────────────────────────
 
+  if (!query) {
+    return (
+      <EmptyState
+        icon={Search}
+        title="Comece uma busca"
+        description="Digite o nome de um livro ou autor no campo acima para ver os resultados."
+      />
+    );
+  }
+
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground my-2">
-        <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
-        <span className="text-sm">Buscando livros...</span>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin text-accent" />
+          Buscando livros...
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-48 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-sm text-destructive">{error}</p>;
+    return (
+      <Alert variant="destructive">
+        <AlertCircle />
+        <AlertTitle>Busca indisponível</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (books.length === 0) {
+    return (
+      <EmptyState
+        icon={BookOpen}
+        title="Nenhum resultado"
+        description={`Não encontramos livros para "${query}". Tente outro termo ou verifique a ortografia.`}
+      />
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-4 w-full">
-      {query && (
-        <p className="text-sm text-muted-foreground col-span-1 md:col-span-2 lg:col-span-3">
-          {totalItems} Resultados encontrados para:{" "}
-          <span className="font-semibold text-foreground">
-            &quot;{query}&quot;
-          </span>
-        </p>
-      )}
+    <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <p className="text-sm text-muted-foreground col-span-full">
+        {totalItems} {totalItems === 1 ? "resultado" : "resultados"} para{" "}
+        <span className="font-semibold text-foreground">
+          &quot;{query}&quot;
+        </span>
+      </p>
 
       {books.map((book, index) => (
         <BookCard
@@ -140,7 +174,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
       >
         {loadingMore && (
           <div className="flex items-center gap-2 text-muted-foreground py-2">
-            <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+            <Loader2 className="size-5 animate-spin text-accent" />
             <span className="text-xs">Buscando mais livros...</span>
           </div>
         )}

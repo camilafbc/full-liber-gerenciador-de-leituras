@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthContext } from "@/context/authContext";
 import { Book, ReadingStatus } from "@/types/Book";
+import { formatDate } from "@/utils/formatDatet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
@@ -163,7 +164,7 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
       : 0;
 
   return (
-    <main className="mx-auto w-full  px-4 py-6 sm:px-6 lg:px-8">
+    <main className=" w-full  px-4 py-6 sm:px-6 lg:px-8">
       {/* Ação de Retorno */}
       <div className="mb-6">
         <Button
@@ -183,7 +184,7 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
         <article className="flex flex-col gap-8 lg:col-span-8">
           {/* Bloco Superior: Capa + Apresentação */}
           <section className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
-            <div className="relative mx-auto aspect-[2/3] w-48 shrink-0 overflow-hidden rounded-xl border bg-muted shadow-md sm:mx-0 sm:w-56">
+            <div className="relative mx-auto aspect-2/3 w-48 shrink-0 overflow-hidden rounded-xl border bg-muted shadow-md sm:mx-0 sm:w-56">
               {book.imageUrl ? (
                 <Image
                   src={book.imageUrl}
@@ -259,7 +260,7 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
                         Data de Publicação
                       </dt>
                       <dd className="mt-0.5 font-medium text-foreground">
-                        {book.publishedDate}
+                        {formatDate(book.publishedDate)}
                       </dd>
                     </div>
                   )}
@@ -499,228 +500,4 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
       </div>
     </main>
   );
-
-  // return (
-  //   <main className="mx-auto flex w-full max-w-none flex-col gap-6 sm:gap-8">
-  //     <Button variant="ghost" className="w-fit" onClick={() => router.back()}>
-  //       <ArrowLeft /> Voltar
-  //     </Button>
-  //     <div className="grid w-full items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
-  //       <section className="grid w-full gap-6 rounded-xl border bg-card p-4 shadow-xs sm:p-6 md:grid-cols-[minmax(10rem,15rem)_minmax(0,1fr)]">
-  //         <div className="relative mx-auto aspect-2/3 w-full max-w-60 overflow-hidden rounded-lg bg-muted md:mx-0">
-  //           {book.imageUrl ? (
-  //             <Image
-  //               src={book.imageUrl}
-  //               alt={`Capa de ${book.title}`}
-  //               fill
-  //               sizes="(max-width: 768px) 240px, 15rem"
-  //               className="object-cover"
-  //             />
-  //           ) : (
-  //             <div className="flex h-full items-center justify-center text-muted-foreground">
-  //               Sem capa
-  //             </div>
-  //           )}
-  //         </div>
-  //         <div className="flex min-w-0 flex-col gap-5">
-  //           <div className="min-w-0">
-  //             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-  //               {book.title}
-  //             </h1>
-  //             {book.subtitle && (
-  //               <p className="mt-1 text-lg text-muted-foreground">
-  //                 {book.subtitle}
-  //               </p>
-  //             )}
-  //             {book.authors.length > 0 && (
-  //               <p className="mt-2 text-muted-foreground">
-  //                 {book.authors.join(", ")}
-  //               </p>
-  //             )}
-  //           </div>
-  //           <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm sm:grid-cols-3 md:grid-cols-2">
-  //             {book.id > 0 && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">ID</dt>
-  //                 <dd className="break-all font-medium">{book.id}</dd>
-  //               </div>
-  //             )}
-  //             {book.uuid && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">UUID</dt>
-  //                 <dd className="break-all font-medium">{book.uuid}</dd>
-  //               </div>
-  //             )}
-  //             {book.externalId && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">ID externo</dt>
-  //                 <dd className="break-all font-medium">{book.externalId}</dd>
-  //               </div>
-  //             )}
-  //             {book.publisher && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">Editora</dt>
-  //                 <dd className="font-medium">{book.publisher}</dd>
-  //               </div>
-  //             )}
-  //             {book.pageCount && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">Páginas</dt>
-  //                 <dd className="font-medium">{book.pageCount}</dd>
-  //               </div>
-  //             )}
-  //             {book.publishedDate && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">Publicação</dt>
-  //                 <dd className="font-medium">{book.publishedDate}</dd>
-  //               </div>
-  //             )}
-  //             {book.isbn13 && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">ISBN-13</dt>
-  //                 <dd className="font-medium">{book.isbn13}</dd>
-  //               </div>
-  //             )}
-  //             {book.isbn10 && (
-  //               <div>
-  //                 <dt className="text-muted-foreground">ISBN-10</dt>
-  //                 <dd className="font-medium">{book.isbn10}</dd>
-  //               </div>
-  //             )}
-  //           </dl>
-  //           {book.categories.length > 0 && (
-  //             <div className="flex flex-wrap gap-2">
-  //               {book.categories.map((category) => (
-  //                 <Badge key={category} variant="secondary">
-  //                   {category}
-  //                 </Badge>
-  //               ))}
-  //             </div>
-  //           )}
-  //           {book.description && (
-  //             <div
-  //               className="max-h-56 overflow-y-auto text-sm leading-6 text-muted-foreground"
-  //               dangerouslySetInnerHTML={{ __html: book.description }}
-  //             />
-  //           )}
-  //         </div>
-  //       </section>
-
-  //       {libraryInfo ? (
-  //         <section className="flex min-w-0 flex-col gap-5 rounded-xl border bg-card p-4 shadow-xs sm:p-6">
-  //           <div className="flex items-center justify-between gap-3">
-  //             <h2 className="text-xl font-semibold">Gerenciador de leitura</h2>
-  //             <Badge>{statusLabels[libraryInfo.status]}</Badge>
-  //           </div>
-  //           <div className="flex items-center justify-between text-sm">
-  //             <span>Progresso</span>
-  //             <span>
-  //               {libraryInfo.currentPage}/{pageCount || "?"} páginas (
-  //               {Math.round(progress)}%)
-  //             </span>
-  //           </div>
-  //           <Progress value={progress} />
-  //           <form
-  //             onSubmit={form.handleSubmit(saveChanges)}
-  //             className="flex flex-col gap-4"
-  //           >
-  //             <FieldGroup>
-  //               <Field>
-  //                 <FieldLabel htmlFor="currentPage">Página atual</FieldLabel>
-  //                 <Input
-  //                   id="currentPage"
-  //                   type="number"
-  //                   min={0}
-  //                   max={pageCount || undefined}
-  //                   {...form.register("currentPage")}
-  //                 />
-  //                 <FieldError errors={[form.formState.errors.currentPage]} />
-  //               </Field>
-  //               <Field>
-  //                 <FieldLabel htmlFor="status">Status</FieldLabel>
-  //                 <select
-  //                   id="status"
-  //                   className="h-9 rounded-md border bg-background px-3 text-sm"
-  //                   {...form.register("status")}
-  //                 >
-  //                   {Object.entries(statusLabels).map(([value, label]) => (
-  //                     <option key={value} value={value}>
-  //                       {label}
-  //                     </option>
-  //                   ))}
-  //                 </select>
-  //               </Field>
-  //             </FieldGroup>
-  //             {error && <p className="text-sm text-destructive">{error}</p>}
-  //             <Button type="submit" disabled={saving}>
-  //               <Save />
-  //               {saving ? "Salvando..." : "Salvar alterações"}
-  //             </Button>
-  //           </form>
-  //           {libraryInfo.status === "COMPLETED" && (
-  //             <div className="flex flex-col gap-3 border-t pt-5">
-  //               <h3 className="font-medium">Sua avaliação</h3>
-  //               <div
-  //                 className="flex gap-1"
-  //                 role="radiogroup"
-  //                 aria-label="Avaliação do livro"
-  //               >
-  //                 {Array.from({ length: 5 }, (_, index) => {
-  //                   const value = index + 1;
-  //                   return (
-  //                     <button
-  //                       key={value}
-  //                       type="button"
-  //                       aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
-  //                       onClick={() => setRating(value)}
-  //                     >
-  //                       <Star
-  //                         className={
-  //                           value <= rating
-  //                             ? "size-6 fill-accent text-accent"
-  //                             : "size-6 text-muted-foreground/30"
-  //                         }
-  //                       />
-  //                     </button>
-  //                   );
-  //                 })}
-  //               </div>
-  //               <textarea
-  //                 value={comment}
-  //                 onChange={(event) => setComment(event.target.value)}
-  //                 rows={4}
-  //                 maxLength={5000}
-  //                 placeholder="Escreva uma resenha opcional..."
-  //                 className="w-full resize-y rounded-md border bg-background px-3 py-2 text-sm"
-  //               />
-  //               <Button
-  //                 type="button"
-  //                 variant="secondary"
-  //                 onClick={saveReview}
-  //                 disabled={saving}
-  //               >
-  //                 {saving ? "Salvando..." : "Salvar avaliação"}
-  //               </Button>
-  //             </div>
-  //           )}
-  //           <div className="border-t pt-6">
-  //             <Button
-  //               variant="destructive"
-  //               onClick={removeBook}
-  //               disabled={removing}
-  //             >
-  //               <Trash2 />
-  //               {removing ? "Removendo..." : "Remover da Biblioteca"}
-  //             </Button>
-  //           </div>
-  //         </section>
-  //       ) : (
-  //         <div className="flex items-center gap-2 rounded-xl border border-dashed p-4 text-sm text-muted-foreground sm:p-6">
-  //           <Loader2 className="size-4 shrink-0" /> Este livro não está na sua
-  //           biblioteca.
-  //         </div>
-  //       )}
-  //     </div>
-  //   </main>
-  // );
 }

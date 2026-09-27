@@ -1,20 +1,18 @@
 "use client";
 
 import { getLibraryBooks } from "@/api/books";
+import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthContext } from "@/context/authContext";
 import { LibraryBook } from "@/types/Book";
-import { BookOpen, Loader2, Star } from "lucide-react";
+import { AlertCircle, BookOpen, Search, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-// const statusLabels = {
-//   WANT_TO_READ: "Quero ler",
-//   READING: "Lendo",
-//   COMPLETED: "Concluído",
-//   DROPPED: "Abandonei",
-// } as const;
 
 function RatingStars({ rating }: { rating?: number }) {
   return (
@@ -43,43 +41,45 @@ function RatingStars({ rating }: { rating?: number }) {
   );
 }
 
+function LibraryCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <Skeleton className="mx-auto aspect-2/3 w-full max-w-42 rounded-none" />
+      <CardContent className="space-y-2 pt-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-3 w-16" />
+      </CardContent>
+    </Card>
+  );
+}
+
 function LibraryCard({ item }: { item: LibraryBook }) {
   const { book } = item;
 
   return (
-    <Link href={`/book/${book.externalId}`} className="group block h-full">
-      <Card className="flex h-full flex-col overflow-hidden border-border transition-shadow duration-200 group-hover:shadow-md">
-        <div className="relative aspect-2/3 w-full max-w-42 overflow-hidden bg-muted mx-auto rounded-md">
+    <Link href={`/books/${book.externalId}`} className="group block h-full">
+      <Card className="flex h-full flex-col overflow-hidden transition-shadow duration-200 hover:shadow-md">
+        <div className="relative mx-auto aspect-2/3 w-full max-w-42 overflow-hidden rounded-md bg-muted">
           {book.imageUrl ? (
             <Image
               src={book.imageUrl}
               alt={`Capa de ${book.title}`}
               fill
               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
-              className="object-cover transition-transform duration-300 group-hover:scale-105 "
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              <BookOpen className="size-8" />
+              <BookOpen className="size-8" aria-hidden />
             </div>
           )}
         </div>
-        <CardContent className="flex flex-1 flex-col gap-2">
-          <div className="flex flex-col items-start justify-between gap-4">
-            <h2 className="line-clamp-2 font-semibold leading-tight">
-              {book.title}
-            </h2>
-            {/* <Badge variant="secondary" className="shrink-0 text-[10px]">
-              {statusLabels[item.status]}
-            </Badge> */}
-            <RatingStars rating={book.review?.rating} />
-            {/* <Badge variant="secondary" className="shrink-0 text-[10px]">
-              {statusLabels[item.status]}
-            </Badge> */}
-          </div>
-          {/* <p className="line-clamp-1 text-sm text-muted-foreground">
-            {book.authors?.join(", ") || "Autor desconhecido"}
-          </p> */}
+        <CardContent className="flex flex-1 flex-col gap-2 pt-4">
+          <h2 className="line-clamp-2 font-semibold leading-tight">
+            {book.title}
+          </h2>
+          <RatingStars rating={book.review?.rating} />
         </CardContent>
       </Card>
     </Link>
@@ -104,36 +104,61 @@ export default function BibliotecaPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex min-h-64 items-center justify-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Carregando sua biblioteca...
-      </div>
+      <section className="flex flex-col gap-6">
+        <PageHeader
+          description="Seus livros salvos para acompanhar"
+          title="Minha biblioteca"
+        />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <LibraryCardSkeleton key={i} />
+          ))}
+        </div>
+      </section>
     );
   }
 
-  if (error) return <p className="text-sm text-destructive">{error}</p>;
+  if (error) {
+    return (
+      <section className="flex flex-col gap-6">
+        <PageHeader title="Minha biblioteca" />
+        <Alert variant="destructive">
+          <AlertCircle />
+          <AlertTitle>Erro ao carregar</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </section>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-6">
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Seus livros salvos para acompanhar
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Minha biblioteca
-        </h1>
-      </div>
+      <PageHeader
+        description="Seus livros salvos para acompanhar"
+        title="Minha biblioteca"
+        actions={
+          books.length > 0 ? (
+            <span className="text-sm text-muted-foreground">
+              {books.length} {books.length === 1 ? "livro" : "livros"}
+            </span>
+          ) : undefined
+        }
+      />
 
       {books.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-8 text-center">
-          <BookOpen className="size-8 text-muted-foreground" />
-          <div>
-            <h2 className="font-medium">Sua biblioteca está vazia</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Busque um livro para começar sua coleção.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="Sua biblioteca está vazia"
+          description="Busque um livro e adicione à coleção para acompanhar sua leitura."
+          action={
+            <Button asChild>
+              <Link href="/buscar">
+                <Search className="size-4" />
+                Buscar livros
+              </Link>
+            </Button>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {books.map((item) => (

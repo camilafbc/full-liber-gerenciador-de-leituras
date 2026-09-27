@@ -104,21 +104,4 @@ export const BookCard = ({
       </CardFooter>
     </Card>
   );
-  // return (
-  //   <Card className="max-w-40">
-  //     <CardHeader>
-  //       <Image
-  //         src="https://upload.wikimedia.org/wikipedia/pt/d/dc/The_Hunger_Games.jpg"
-  //         alt="capa do livro"
-  //         sizes="100%"
-  //         width={0}
-  //         height={0}
-  //         className="h-40 w-full
-  //         "
-  //       />
-  //       <CardDescription className="text-center">Jogos Vorazes</CardDescription>
-  //     </CardHeader>
-  //     <CardContent></CardContent>
-  //   </Card>
-  // );
 };

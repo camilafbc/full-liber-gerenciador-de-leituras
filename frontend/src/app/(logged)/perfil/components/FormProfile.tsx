@@ -132,9 +132,9 @@ export const FormProfile = ({ defaultValues, token }: FormProfileProps) => {
           Voltar
         </Button>
 
-        <Button type="submit" className="bg-primary dark:bg-accent">
+        <Button type="submit" disabled={isPending}>
           {isPending && <Loader2 className="animate-spin" />}
-          {!isPending && "Salvar Alterações"}
+          {isPending ? "Salvando..." : "Salvar alterações"}
         </Button>
       </div>
     </form>

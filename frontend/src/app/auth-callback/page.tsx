@@ -1,10 +1,22 @@
 "use client";
 
 import { useAuthContext } from "@/context/authContext";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function AuthCallbackPage() {
+function AuthCallbackFallback() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-primary text-primary-foreground">
+      <Loader2 className="size-8 animate-spin" aria-hidden />
+      <p className="animate-pulse text-sm text-primary-foreground/80">
+        Sincronizando sua conta do Google...
+      </p>
+    </div>
+  );
+}
+
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser, setToken } = useAuthContext();
@@ -16,6 +28,7 @@ export default function AuthCallbackPage() {
     if (!accessToken || !refreshToken) {
       console.error("Tokens ausentes na rota de callback");
       router.push("/login?error=oauth_failed");
+      return;
     }
 
     async function saveTokens() {
@@ -28,6 +41,7 @@ export default function AuthCallbackPage() {
 
         if (!response.ok) {
           router.push("/login?error=cookie_saving_failed");
+          return;
         }
 
         const data = await response.json();
@@ -45,12 +59,13 @@ export default function AuthCallbackPage() {
     saveTokens();
   }, [searchParams, router, setUser, setToken]);
 
+  return <AuthCallbackFallback />;
+}
+
+export default function AuthCallbackPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 text-slate-100 gap-4">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-slate-200" />
-      <p className="text-sm text-slate-400 animate-pulse">
-        Sincronizando sua conta do Google...
-      </p>
-    </div>
+    <Suspense fallback={<AuthCallbackFallback />}>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BookOpen, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ImageNotFound } from "./ImageNotFound";
@@ -36,10 +38,10 @@ export const BookCard = ({
 
   if (variant === "list") {
     return (
-      <Link href={`/book/${externalId}`} onClick={onClick}>
-        <Card className=" gap-4 bg-card border-border items-start overflow-hidden">
+      <Link href={`/books/${externalId}`} onClick={onClick} className="block">
+        <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
           <CardContent className="flex flex-col md:flex-row md:gap-4">
-            <div className="relative w-[150px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md">
+            <div className="relative w-[150px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md bg-muted">
               {coverUrl ? (
                 <Image
                   src={coverUrl ?? "/teste"}
@@ -73,7 +75,9 @@ export const BookCard = ({
                   {description}
                 </p>
               )}
-              <div className="mt-4">Ver mais</div>
+              <Button variant="link" className="mt-4 h-auto px-0" tabIndex={-1}>
+                Ver detalhes
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -130,7 +134,9 @@ export const BookCard = ({
                 dangerouslySetInnerHTML={{ __html: description }}
               />
             )}
-            <div className="mt-4">Ver mais</div>
+            <Button variant="link" className="mt-4 h-auto px-0">
+              Ver detalhes
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -138,7 +144,11 @@ export const BookCard = ({
   }
 
   return (
-    <Card className="group flex flex-col p-3 bg-card border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-full max-w-[180px]">
+    <Card
+      className={cn(
+        "group flex w-full max-w-[180px] flex-col p-3 transition-shadow hover:shadow-md",
+      )}
+    >
       <div className="aspect-3/4 w-full overflow-hidden rounded-sm">
         <Image
           src={coverUrl ?? "/teste"}

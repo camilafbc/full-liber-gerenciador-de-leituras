@@ -35,12 +35,26 @@ export const signUp: RequestHandler = async (req, res) => {
       data.data.email,
       passwordHash,
       "credentials",
-      "local",
+      data.data.email,
       data.data.imageUrl,
     );
 
-    // retornar os dados o usuário criado
-    return res.status(201).json(newUser);
+    const accessToken = jwt.sign(
+      { uuid: newUser.user.uuid },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "15m" },
+    );
+
+    res.cookie("liber_bk_refresh_token", newUser.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(201).json({
+      accessToken,
+      user: newUser.user,
+    });
   } catch (error) {
     console.error("Erro ao criar usuário: ", error);
     const dbError = handleDatabaseError(error);
