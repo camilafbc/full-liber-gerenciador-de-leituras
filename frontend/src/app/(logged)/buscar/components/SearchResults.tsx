@@ -8,91 +8,100 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthContext } from "@/context/authContext";
 import { Book } from "@/types/Book";
 import { AlertCircle, BookOpen, Loader2, Search } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookDetailsSheet } from "./BookDetailsSheet";
+import { getCleanBookCover } from "@/utils/cleanBookCover";
+import { useRouter, useSearchParams } from "next/navigation";
+import Pagination from "@/components/Pagination";
 
 interface SearchResultProps {
   query: string;
 }
 
 export const SearchResults = ({ query }: SearchResultProps) => {
-  const { token } = useAuthContext();
+  const { token, loading: authLoading } = useAuthContext();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const currentPage = searchParams.get("page") ?? "1";
+  const page = parseInt(currentPage);
 
   const [books, setBooks] = useState<Book[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  // Guarda a página atual SEM causar re-render (evita loop com o observer)
-  const pageRef = useRef(1);
-  const observerTarget = useRef<HTMLDivElement>(null);
-
-  // ─── 1. Reset sempre que a query mudar ───────────────────────────────────
   useEffect(() => {
-    setBooks([]);
-    setTotalItems(0);
-    setTotalPages(1);
-    setHasMore(false);
-    setError(null);
-    pageRef.current = 1;
-  }, [query]);
+    if (authLoading || !query) return;
 
-  // ─── 2. Função de fetch reutilizável ────────────────────────────────────
-  const fetchPage = useCallback(
-    async (pageToFetch: number) => {
-      if (!query) return;
-
-      const isFirstPage = pageToFetch === 1;
-      isFirstPage ? setLoading(true) : setLoadingMore(true);
-
+    const fetchBooks = async () => {
       try {
-        const result = await searchBooks(query, pageToFetch, 10, token ?? "");
+        setLoading(true);
+
+        const result = await searchBooks(query, page, 10, token ?? "");
         if (!result?.data) return;
 
-        setBooks((prev) =>
-          isFirstPage ? result.data : [...prev, ...result.data],
-        );
-        setTotalItems(result.meta.totalItems);
-        setTotalPages(result.meta.totalPages);
-        setHasMore(pageToFetch < result.meta.totalPages);
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao buscar os livros.");
-      } finally {
-        isFirstPage ? setLoading(false) : setLoadingMore(false);
-      }
-    },
-    [query, token],
-  );
-
-  // ─── 3. Carrega a página 1 sempre que query (ou fetchPage) mudar ────────
-  useEffect(() => {
-    if (!query) return;
-    fetchPage(1);
-  }, [query, fetchPage]);
-
-  // ─── 4. Intersection Observer — só incrementa a página e busca ──────────
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
-          const nextPage = pageRef.current + 1;
-          pageRef.current = nextPage;
-          fetchPage(nextPage);
+        setBooks(result.data);
+        if (result.meta?.totalItems) {
+          setTotalItems((prevTotal) => {
+            if (page === 1 || !prevTotal) {
+              const calculatedTotalPages = Math.ceil(
+                result.meta.totalItems / 10,
+              );
+              setTotalPages(calculatedTotalPages);
+              return result.meta.totalItems;
+            }
+            return prevTotal;
+          });
         }
-      },
-      { threshold: 0.1, rootMargin: "100px" },
-    );
+      } catch (error) {
+        console.error("Erro ao buscar livros: ", error);
+        setError("Erro ao buscar livros");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
-    return () => observer.disconnect();
-  }, [hasMore, loading, loadingMore, fetchPage]);
+    fetchBooks();
+  }, [page, query, token]);
 
-  // ─── Renders ─────────────────────────────────────────────────────────────
+  const handleNextPage = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page < totalPages) {
+      const nextPage = page + 1;
+      params.set("page", nextPage.toString());
+      router.push(`/buscar?${params.toString()}`);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page > 1 && page <= totalPages) {
+      const nextPage = page - 1;
+      params.set("page", nextPage.toString());
+      router.push(`/buscar?${params.toString()}`);
+    }
+  };
+
+  const handleFirstPage = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page !== 1) {
+      const nextPage = 1;
+      params.set("page", nextPage.toString());
+      router.push(`/buscar?${params.toString()}`);
+    }
+  };
+
+  const handleLastPage = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page !== totalPages) {
+      const nextPage = totalPages;
+      params.set("page", nextPage.toString());
+      router.push(`/buscar?${params.toString()}`);
+    }
+  };
 
   if (!query) {
     return (
@@ -141,59 +150,58 @@ export const SearchResults = ({ query }: SearchResultProps) => {
   }
 
   return (
-    <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <p className="text-sm text-muted-foreground col-span-full">
-        {totalItems} {totalItems === 1 ? "resultado" : "resultados"} para{" "}
-        <span className="font-semibold text-foreground">
-          &quot;{query}&quot;
-        </span>
-      </p>
+    <>
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <p className="text-sm text-muted-foreground col-span-full">
+          {totalItems} {totalItems === 1 ? "resultado" : "resultados"} para{" "}
+          <span className="font-semibold text-foreground">
+            &quot;{query}&quot;
+          </span>
+        </p>
 
-      {books.map((book, index) => (
-        <BookCard
-          key={index + "-" + book.externalId}
-          index={index}
-          externalId={book.externalId}
-          title={book?.title}
-          author={book?.authors}
-          pages={book?.pageCount || 0}
-          description={book?.description}
-          coverUrl={book?.imageUrl}
-          variant="list"
-          onClick={(event) => {
-            event.preventDefault();
-            setSelectedBook(book);
+        {books.map((book, index) => (
+          <BookCard
+            key={index + "-" + book.externalId}
+            index={index}
+            externalId={book.externalId}
+            title={book?.title}
+            author={book?.authors}
+            pages={book?.pageCount || 0}
+            description={book?.description}
+            coverUrl={getCleanBookCover(book?.imageUrl)}
+            variant="list"
+            onClick={(event) => {
+              event.preventDefault();
+              setSelectedBook(book);
+            }}
+          />
+        ))}
+        <BookDetailsSheet
+          book={selectedBook}
+          open={selectedBook !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedBook(null);
+          }}
+          onUpdated={(updatedBook) => {
+            setSelectedBook(updatedBook);
+            setBooks((currentBooks) =>
+              currentBooks.map((item) =>
+                item.externalId === updatedBook.externalId ? updatedBook : item,
+              ),
+            );
           }}
         />
-      ))}
-
-      {/* Sentinel do observer */}
-      <div
-        ref={observerTarget}
-        className="h-10 flex justify-center items-center col-span-1 md:col-span-2 lg:col-span-3"
-      >
-        {loadingMore && (
-          <div className="flex items-center gap-2 text-muted-foreground py-2">
-            <Loader2 className="size-5 animate-spin text-accent" />
-            <span className="text-xs">Buscando mais livros...</span>
-          </div>
-        )}
       </div>
-      <BookDetailsSheet
-        book={selectedBook}
-        open={selectedBook !== null}
-        onOpenChange={(open) => {
-          if (!open) setSelectedBook(null);
-        }}
-        onUpdated={(updatedBook) => {
-          setSelectedBook(updatedBook);
-          setBooks((currentBooks) =>
-            currentBooks.map((item) =>
-              item.externalId === updatedBook.externalId ? updatedBook : item,
-            ),
-          );
-        }}
-      />
-    </div>
+      <div className="flex items-center justify-center mt-6">
+        <Pagination
+          currentPage={+currentPage}
+          totalPages={totalPages}
+          onNextPage={handleNextPage}
+          onPreviousPage={handlePreviousPage}
+          onFirstPage={handleFirstPage}
+          onLastPage={handleLastPage}
+        />
+      </div>
+    </>
   );
 };

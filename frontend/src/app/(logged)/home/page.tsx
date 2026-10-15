@@ -10,11 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthContext } from "@/context/authContext";
-import {
-  BookSearchIcon,
-  LibraryBigIcon,
-  UserRoundIcon,
-} from "lucide-react";
+import { BookSearchIcon, LibraryBigIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 const quickLinks = [
@@ -68,10 +64,7 @@ export default function HomePage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {quickLinks.map(({ title, description, href, icon: Icon }) => (
-          <Card
-            key={href}
-            className="transition-shadow hover:shadow-md"
-          >
+          <Card key={href} className="transition-shadow hover:shadow-md">
             <CardHeader>
               <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted">
                 <Icon className="size-5 text-foreground" aria-hidden />

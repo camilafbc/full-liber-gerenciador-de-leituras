@@ -39,7 +39,7 @@ export const googleBooksGateway = {
 
     const startIndex = (page - 1) * limit;
 
-    const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&key=${API_KEY}`;
+    const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&langRestrict=pt&key=${API_KEY}`;
 
     const response = await fetch(URL);
 
