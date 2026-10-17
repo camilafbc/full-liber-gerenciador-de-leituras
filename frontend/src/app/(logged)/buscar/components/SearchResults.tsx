@@ -40,7 +40,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
       try {
         setLoading(true);
 
-        const result = await searchBooks(query, page, 10, token);
+        const result = await searchBooks(query, page, 10, token ?? "");
         if (!result?.data) return;
 
         setBooks(result.data);
@@ -56,17 +56,16 @@ export const SearchResults = ({ query }: SearchResultProps) => {
             return prevTotal;
           });
         }
-      } catch (err) {
-        console.error("Erro ao buscar livros: ", err);
-        const msg = err instanceof Error ? err.message : "Erro ao buscar livros";
-        setError(msg);
+      } catch (error) {
+        console.error("Erro ao buscar livros: ", error);
+        setError("Erro ao buscar livros");
       } finally {
         setLoading(false);
       }
     };
 
     fetchBooks();
-  }, [page, query, token, authLoading]);
+  }, [authLoading, page, query, token]);
 
   const handleNextPage = () => {
     const params = new URLSearchParams(searchParams.toString());
