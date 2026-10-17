@@ -22,6 +22,14 @@ export async function POST(request: Request) {
       path: "/",
     });
 
+    cookieStore.set("liber_access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60,
+      path: "/",
+    });
+
     const me = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
       method: "GET",
       headers: {
@@ -31,10 +39,17 @@ export async function POST(request: Request) {
 
     const data = await me.json();
 
+    if (!me.ok) {
+      return NextResponse.json(
+        { error: data.error || "Falha ao obter dados do usuário" },
+        { status: me.status },
+      );
+    }
+
     return NextResponse.json({
       success: true,
       user: data.user,
-      accessToken: data.accessToken,
+      accessToken,
     });
   } catch (error) {
     console.error("Erro ao criar token no login social: ", error);

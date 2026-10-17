@@ -35,15 +35,21 @@ export const googleBooksGateway = {
     page: number,
     limit: number,
   ): Promise<{ totalItems: number; books: GoogleBooksData[] }> => {
-    const API_KEY = process.env.GOOGLE_BOOKS_KEY as string;
-
+    const API_KEY = process.env.GOOGLE_BOOKS_KEY;
+    const cleanQuery = query.replace(/^\?q=/, "").trim();
     const startIndex = (page - 1) * limit;
+    const keyParam = API_KEY ? `&key=${API_KEY}` : "";
 
-    const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&langRestrict=pt&key=${API_KEY}`;
+    const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanQuery)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&langRestrict=pt${keyParam}`;
 
     const response = await fetch(URL);
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      console.error(
+        `Google Books API retornou erro ${response.status}:`,
+        errorText,
+      );
       throw new Error("Falha ao buscar livros na API do Google");
     }
 
@@ -77,12 +83,18 @@ export const googleBooksGateway = {
   },
 
   getBookId: async (id: string): Promise<GoogleBooksData | null> => {
-    const API_KEY = process.env.GOOGLE_BOOKS_KEY as string;
-    const URL = `https://www.googleapis.com/books/v1/volumes/${id}?key=${API_KEY}`;
+    const API_KEY = process.env.GOOGLE_BOOKS_KEY;
+    const keyParam = API_KEY ? `?key=${API_KEY}` : "";
+    const URL = `https://www.googleapis.com/books/v1/volumes/${id}${keyParam}`;
 
     const response = await fetch(URL);
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      console.error(
+        `Google Books API getBookId erro ${response.status}:`,
+        errorText,
+      );
       throw new Error("Erro ao buscar livro");
     }
 

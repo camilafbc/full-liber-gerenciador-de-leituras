@@ -4,18 +4,19 @@ import { ExtendedRequest } from "../../types/extended-request";
 
 export const searchBooks: RequestHandler = async (req, res) => {
   try {
-    const query = req.query;
+    const rawQuery = (req.query.q as string) || "";
+    const searchTerm = rawQuery.replace(/^\?q=/, "").trim();
 
-    if (!query.q) {
+    if (!searchTerm) {
       return res
         .status(400)
         .json({ error: "Termo de busca incorreto ou ausente" });
     }
 
-    const page = parseInt(query.page as string) || 1;
-    const limit = parseInt(query.limit as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    const result = await searchGoogleBooks(query.q as string, page, limit);
+    const result = await searchGoogleBooks(searchTerm, page, limit);
 
     return res.status(200).json({
       meta: {

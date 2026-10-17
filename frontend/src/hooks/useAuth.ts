@@ -28,9 +28,11 @@ export function useAuth() {
       setToken(data.accessToken);
 
       router.push("/home");
-    } catch (error: any) {
-      console.error("Erro capturado no Hook:", error.message);
-      setError(error.message);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Erro inesperado ao realizar login.";
+      console.error("Erro capturado no Hook:", message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -41,6 +43,7 @@ export function useAuth() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
+      setToken(null);
       router.push("/login");
     } catch (err) {
       console.error("Erro ao deslogar:", err);

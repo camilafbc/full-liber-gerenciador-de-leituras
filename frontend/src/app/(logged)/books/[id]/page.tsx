@@ -1,5 +1,5 @@
 import { Book } from "@/types/Book";
-import { cookies } from "next/headers";
+import { getServerAuthToken } from "@/lib/serverAuth";
 import { redirect } from "next/navigation";
 import { BookManager } from "./BookManager";
 
@@ -11,7 +11,7 @@ export default async function BookPage({ params }: BookPageProps) {
   const { id } = await params;
   if (!id) redirect("/biblioteca");
 
-  const token = (await cookies()).get("liber_access_token")?.value;
+  const token = await getServerAuthToken();
   if (!token) redirect("/login");
 
   try {

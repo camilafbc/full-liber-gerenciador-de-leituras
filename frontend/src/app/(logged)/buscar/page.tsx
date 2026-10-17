@@ -20,7 +20,10 @@ export default async function BuscarPage({ searchParams }: BuscaPageProps) {
       <Suspense
         fallback={<Skeleton className="h-10 w-full max-w-xl rounded-lg" />}
       >
-        <SearchInput placeholder="Buscar livro, autor..." className="max-w-xl" />
+        <SearchInput
+          placeholder="Buscar livro, autor..."
+          className="max-w-xl"
+        />
       </Suspense>
       <SearchResults query={query || ""} />
     </section>

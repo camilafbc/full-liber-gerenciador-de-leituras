@@ -10,8 +10,9 @@ export const searchBooks = async (
   meta: { page: number; limit: number; totalItems: number; totalPages: number };
   data: Book[];
 }> => {
+  const sanitizedQuery = query.replace(/^\?q=/, "").trim();
   const response = await apiFetchClient(
-    `/books/search?q=${query}&limit=${limit}&page=${page}`,
+    `/books/search?q=${encodeURIComponent(sanitizedQuery)}&limit=${limit}&page=${page}`,
     {
       method: "GET",
       headers: {
@@ -21,7 +22,12 @@ export const searchBooks = async (
     },
   );
 
-  if (!response.ok) throw new Error("Falha ao buscar livros");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(
+      errorData?.error || `Falha ao buscar livros (Status ${response.status})`,
+    );
+  }
 
   return response.json();
 };

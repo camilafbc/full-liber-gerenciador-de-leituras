@@ -34,13 +34,13 @@ export const SearchResults = ({ query }: SearchResultProps) => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   useEffect(() => {
-    if (authLoading || !query) return;
+    if (authLoading || !token || !query) return;
 
     const fetchBooks = async () => {
       try {
         setLoading(true);
 
-        const result = await searchBooks(query, page, 10, token ?? "");
+        const result = await searchBooks(query, page, 10, token);
         if (!result?.data) return;
 
         setBooks(result.data);
@@ -56,16 +56,17 @@ export const SearchResults = ({ query }: SearchResultProps) => {
             return prevTotal;
           });
         }
-      } catch (error) {
-        console.error("Erro ao buscar livros: ", error);
-        setError("Erro ao buscar livros");
+      } catch (err) {
+        console.error("Erro ao buscar livros: ", err);
+        const msg = err instanceof Error ? err.message : "Erro ao buscar livros";
+        setError(msg);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBooks();
-  }, [page, query, token]);
+  }, [page, query, token, authLoading]);
 
   const handleNextPage = () => {
     const params = new URLSearchParams(searchParams.toString());

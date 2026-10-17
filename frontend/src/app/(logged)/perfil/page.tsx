@@ -9,13 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cookies } from "next/headers";
+import { getServerAuthToken } from "@/lib/serverAuth";
 import { redirect } from "next/navigation";
 import { FormProfile } from "./components/FormProfile";
 
 export default async function ProfilePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("liber_access_token")?.value;
+  const token = await getServerAuthToken();
 
   if (!token) redirect("/login");
 

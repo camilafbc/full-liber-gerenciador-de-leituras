@@ -7,7 +7,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import Cookies from "js-cookie";
 import { setOnTokenUpdate } from "@/api/client";
 
 interface UserData {

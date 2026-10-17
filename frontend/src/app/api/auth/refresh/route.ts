@@ -7,10 +7,12 @@ export async function POST() {
     const refreshToken = cookieStore.get("liber_refresh_token")?.value;
 
     if (!refreshToken) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         { error: "Refresh token não encontrado nos cookies do front-end" },
         { status: 401 },
       );
+      errorResponse.cookies.delete("liber_access_token");
+      return errorResponse;
     }
 
     const refreshResponse = await fetch(
@@ -27,19 +29,14 @@ export async function POST() {
     const data = await refreshResponse.json();
 
     if (!refreshResponse.ok) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         { error: data.error || "Sessão expirada no backend" },
         { status: 401 },
       );
+      errorResponse.cookies.delete("liber_refresh_token");
+      errorResponse.cookies.delete("liber_access_token");
+      return errorResponse;
     }
-
-    // cookieStore.set("liber_access_token", data.accessToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: "strict",
-    //   maxAge: 15 * 60,
-    //   path: "/",
-    // });
 
     const response = NextResponse.json({
       success: true,
