@@ -12,7 +12,7 @@ export const searchBooks = async (
 }> => {
   const sanitizedQuery = query.replace(/^\?q=/, "").trim();
   const response = await apiFetchClient(
-    `/books/search?q=${encodeURIComponent(sanitizedQuery)}&limit=${limit}&page=${page}`,
+    `/books/search?q=${encodeURIComponent(`"${sanitizedQuery}"`)}&limit=${limit}&page=${page}`,
     {
       method: "GET",
       headers: {

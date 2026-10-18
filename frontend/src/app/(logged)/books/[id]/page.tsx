@@ -14,6 +14,8 @@ export default async function BookPage({ params }: BookPageProps) {
   const token = await getServerAuthToken();
   if (!token) redirect("/login");
 
+  let book: Book | null = null;
+
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/books/search/${id}`,
@@ -24,9 +26,12 @@ export default async function BookPage({ params }: BookPageProps) {
     );
 
     if (!response.ok) throw new Error("Livro não encontrado");
-    const book = (await response.json()) as Book;
-    return <BookManager initialBook={book} />;
+    book = (await response.json()) as Book;
   } catch {
     redirect("/biblioteca");
   }
+
+  if (!book) redirect("/biblioteca");
+
+  return <BookManager initialBook={book} />;
 }

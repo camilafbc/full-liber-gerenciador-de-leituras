@@ -2,57 +2,87 @@
 
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type SearchInputProps = {
   placeholder?: string;
-  icon?: React.ReactNode;
   className?: string;
 };
 
 export function SearchInput({
-  placeholder = "Buscar...",
-  icon = <Search className="size-4 shrink-0" aria-hidden />,
+  placeholder = "Buscar por título, autor, editora...",
   className,
 }: SearchInputProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
+
+  const currentQuery = searchParams.get("q") ?? "";
+  const [prevQuery, setPrevQuery] = useState(currentQuery);
+  const [value, setValue] = useState(currentQuery);
+
+  if (prevQuery !== currentQuery) {
+    setPrevQuery(currentQuery);
+    setValue(currentQuery);
+  }
+
+  const handleSearch = (term: string) => {
+    const trimmed = term.trim();
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (trimmed) {
+      params.set("q", trimmed);
+      params.delete("page"); // Reseta para a primeira página ao fazer nova busca
+    } else {
+      params.delete("q");
+      params.delete("page");
+    }
+
+    startTransition(() => {
+      router.push(`/buscar?${params.toString()}`);
+    });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const term = (e.target as HTMLInputElement).value.trim();
-
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (term) {
-        params.set("q", term);
-      } else {
-        params.delete("q");
-      }
-
-      router.push(`/buscar?${params.toString()}`);
+      handleSearch(value);
     }
   };
 
   return (
     <div
       className={cn(
-        "flex h-10 items-center gap-2 rounded-lg border border-input bg-card px-3 shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+        "relative flex w-full items-center gap-2 rounded-xl border border-input/80 bg-card p-1.5 shadow-xs transition-all focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20",
         className,
       )}
     >
-      <span className="text-muted-foreground">{icon}</span>
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+        <Search className="size-4" aria-hidden />
+      </div>
+
       <Input
         type="search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-auto border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-        defaultValue={searchParams.get("q")?.toString()}
+        className="h-10 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/70"
         onKeyDown={handleKeyDown}
       />
+
+      <Button
+        type="button"
+        size="sm"
+        onClick={() => handleSearch(value)}
+        className="shrink-0 gap-1.5 px-4 font-medium shadow-xs dark:bg-accent"
+      >
+        Buscar
+      </Button>
     </div>
   );
 }

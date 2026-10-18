@@ -166,7 +166,7 @@ function StatCard({
 }
 
 export default function HomePage() {
-  const { loading: authLoading, user, token } = useAuthContext();
+  const { loading: authLoading, token } = useAuthContext();
   const [books, setBooks] = useState<LibraryBook[]>([]);
   const [loadingBooks, setLoadingBooks] = useState<boolean>(true);
 
@@ -263,7 +263,11 @@ export default function HomePage() {
               Ver biblioteca
             </Link>
           </Button>
-          <Button size="sm" asChild className="gap-1.5 shadow-xs">
+          <Button
+            size="sm"
+            asChild
+            className="gap-1.5 shadow-xs dark:bg-accent"
+          >
             <Link href="/buscar">
               <Plus className="size-4" />
               Adicionar livro
@@ -427,15 +431,15 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-7">
             {recentBooks.map((item) => {
               const cover = getCleanBookCover(item.book.imageUrl);
               return (
                 <Link
                   key={item.book.uuid ?? item.book.externalId}
                   href={`/books/${item.book.externalId}`}
-                  // className="group block"
-                  className="group block w-40 sm:w-45 shrink-0"
+                  className="group block"
+                  // className="group block w-40 sm:w-45 shrink-0"
                 >
                   <Card className="overflow-hidden border border-border/70 transition-all hover:-translate-y-1 hover:shadow-md">
                     <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">

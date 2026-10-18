@@ -38,46 +38,58 @@ export const BookCard = ({
 
   if (variant === "list") {
     return (
-      <Link href={`/books/${externalId}`} onClick={onClick} className="block">
-        <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
-          <CardContent className="flex flex-col md:flex-row md:gap-4">
-            <div className="relative w-[150px] aspect-2/3 transition-transform duration-200 hover:scale-105 rounded-md bg-muted">
+      <Link
+        href={`/books/${externalId}`}
+        onClick={onClick}
+        className="group block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
+      >
+        <Card className="h-full overflow-hidden border-border/70 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md">
+          <CardContent className="flex flex-row gap-4 p-4">
+            <div className="relative w-[110px] sm:w-[130px] shrink-0 aspect-2/3 overflow-hidden rounded-lg bg-muted shadow-sm transition-transform duration-300 group-hover:scale-105">
               {coverUrl ? (
                 <Image
-                  src={coverUrl ?? "/teste"}
+                  src={coverUrl}
                   alt={`Capa do livro - ${title}`}
-                  sizes="150px"
+                  sizes="(max-width: 640px) 110px, 130px"
                   fill
                   priority={isPriority || false}
                   loading={isPriority ? undefined : "lazy"}
-                  className="object-cover rounded-md"
+                  className="object-cover"
                 />
               ) : (
                 <ImageNotFound />
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-lg text-foreground line-clamp-2">
-                {title}
-              </h3>
-              {author && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {author.join(", ")}
-                </p>
-              )}
-              {pages && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {pages} páginas
-                </p>
-              )}
-              {description && (
-                <p className="text-sm text-muted-foreground mt-2 line-clamp-5 text-justify">
-                  {description}
-                </p>
-              )}
-              <Button variant="link" className="mt-4 h-auto px-0" tabIndex={-1}>
-                Ver detalhes
-              </Button>
+            <div className="flex flex-1 min-w-0 flex-col justify-between">
+              <div>
+                <h3
+                  className="font-semibold text-base leading-snug text-foreground line-clamp-2 transition-colors group-hover:text-accent"
+                  title={title}
+                >
+                  {title}
+                </h3>
+                {author && (
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                    {author.join(", ")}
+                  </p>
+                )}
+                {pages && pages > 0 && (
+                  <p className="text-xs text-muted-foreground/80 mt-1 flex items-center gap-1">
+                    <BookOpen className="size-3 text-accent" />
+                    {pages} páginas
+                  </p>
+                )}
+                {description && (
+                  <p className="text-xs text-muted-foreground/90 mt-2 line-clamp-3 sm:line-clamp-4 leading-relaxed">
+                    {description}
+                  </p>
+                )}
+              </div>
+              <div className="pt-3">
+                <span className="inline-flex items-center text-xs font-medium text-accent hover:underline">
+                  Ver detalhes &rarr;
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

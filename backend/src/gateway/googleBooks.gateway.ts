@@ -40,16 +40,46 @@ export const googleBooksGateway = {
     const startIndex = (page - 1) * limit;
     const keyParam = API_KEY ? `&key=${API_KEY}` : "";
 
-    const URL = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanQuery)}&startIndex=${startIndex}&maxResults=${limit}&printType=books&langRestrict=pt${keyParam}`;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanQuery)}&startIndex=${startIndex}&maxResults=${limit}&printType=books${keyParam}&orderBy=relevance&projection=lite&langRestrict=pt`;
 
-    const response = await fetch(URL);
+    // Google Books API ocasionalmente oscila com 503 backendFailed.
+    // Implementamos até 2 tentativas automáticas com pequeno delay para garantir estabilidade.
+    let response: Response | null = null;
+    let lastError = "";
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
-      console.error(
-        `Google Books API retornou erro ${response.status}:`,
-        errorText,
-      );
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        response = await fetch(url);
+        if (response.ok) break;
+
+        const errorText = await response.text().catch(() => "");
+        lastError = `Google Books API retornou status ${response.status}: ${errorText}`;
+        console.warn(
+          `Tentativa ${attempt}/3 falhou para "${cleanQuery}":`,
+          lastError,
+        );
+
+        // Se for erro transitório 503/500/429, aguarda 400ms antes de tentar novamente
+        if (
+          [500, 502, 503, 504, 429].includes(response.status) &&
+          attempt < 3
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+          continue;
+        }
+
+        break;
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+        console.warn(`Erro na tentativa ${attempt}/3:`, lastError);
+        if (attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+        }
+      }
+    }
+
+    if (!response || !response.ok) {
+      console.error("Falha persistente na busca do Google Books:", lastError);
       throw new Error("Falha ao buscar livros na API do Google");
     }
 

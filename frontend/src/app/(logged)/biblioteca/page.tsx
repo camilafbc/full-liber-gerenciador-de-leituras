@@ -33,6 +33,7 @@ interface StatusConfigItem {
   label: string;
   badgeVariant: "default" | "secondary" | "outline";
   icon: LucideIcon;
+  iconColor: string;
 }
 
 const STATUS_CONFIG: Record<ReadingStatus, StatusConfigItem> = {
@@ -40,21 +41,25 @@ const STATUS_CONFIG: Record<ReadingStatus, StatusConfigItem> = {
     label: "Lendo",
     badgeVariant: "default",
     icon: BookOpen,
+    iconColor: "text-accent",
   },
   WANT_TO_READ: {
     label: "Quero ler",
     badgeVariant: "secondary",
     icon: Bookmark,
+    iconColor: "text-blue-500",
   },
   COMPLETED: {
     label: "Concluído",
     badgeVariant: "outline",
     icon: CheckCircle2,
+    iconColor: "text-emerald-500",
   },
   DROPPED: {
     label: "Abandonei",
     badgeVariant: "outline",
     icon: XCircle,
+    iconColor: "text-red-500",
   },
 };
 
@@ -186,9 +191,11 @@ function LibraryCard({ item }: { item: LibraryBook }) {
             <div className="absolute top-2 left-2 z-10">
               <Badge
                 variant={statusInfo.badgeVariant}
-                className="gap-1 border-background/20 bg-background/90 py-0.5 px-2 text-[10px] font-medium backdrop-blur-xs shadow-xs dark:bg-card/90"
+                className="gap-1 border-background/20 bg-background/90 py-0.5 px-2 text-[10px]  font-medium backdrop-blur-xs shadow-xs dark:bg-card/90 text-primary"
               >
-                {StatusIcon && <StatusIcon className="size-3" />}
+                {StatusIcon && (
+                  <StatusIcon className={statusInfo.iconColor + " size-3"} />
+                )}
                 {statusInfo.label}
               </Badge>
             </div>
@@ -361,7 +368,7 @@ export default function BibliotecaPage() {
                 value="READING"
                 className="gap-1.5 px-3 text-xs sm:text-sm"
               >
-                <BookOpen className="size-3.5" />
+                <BookOpen className="size-3.5 text-accent" />
                 Lendo
                 <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                   {counts.READING}
@@ -371,7 +378,7 @@ export default function BibliotecaPage() {
                 value="WANT_TO_READ"
                 className="gap-1.5 px-3 text-xs sm:text-sm"
               >
-                <Bookmark className="size-3.5" />
+                <Bookmark className="size-3.5 text-blue-500" />
                 Quero ler
                 <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                   {counts.WANT_TO_READ}
@@ -381,7 +388,7 @@ export default function BibliotecaPage() {
                 value="COMPLETED"
                 className="gap-1.5 px-3 text-xs sm:text-sm"
               >
-                <CheckCircle2 className="size-3.5" />
+                <CheckCircle2 className="size-3.5 text-emerald-500" />
                 Concluídos
                 <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                   {counts.COMPLETED}
@@ -391,7 +398,7 @@ export default function BibliotecaPage() {
                 value="DROPPED"
                 className="gap-1.5 px-3 text-xs sm:text-sm"
               >
-                <XCircle className="size-3.5" />
+                <XCircle className="size-3.5 text-red-500" />
                 Abandonados
                 <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                   {counts.DROPPED}
@@ -418,7 +425,7 @@ export default function BibliotecaPage() {
               }
             />
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
               {filteredBooks.map((item) => (
                 <LibraryCard
                   key={item.book.uuid ?? item.book.externalId}

@@ -9,12 +9,8 @@ import {
 } from "@/api/books";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -24,25 +20,64 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuthContext } from "@/context/authContext";
 import { Book, ReadingStatus } from "@/types/Book";
+import { getCleanBookCover } from "@/utils/cleanBookCover";
 import { formatDate } from "@/utils/formatDatet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   BookOpen,
+  Bookmark,
+  CalendarDays,
+  CheckCircle2,
+  Hash,
   Loader2,
+  MessageSquareText,
   Plus,
   Save,
   Star,
   Trash2,
+  XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+
+// ─── Configurações de status ──────────────────────────────────────────────────
+const STATUS_CONFIG: Record<
+  ReadingStatus,
+  { label: string; icon: React.ElementType; color: string; bg: string }
+> = {
+  WANT_TO_READ: {
+    label: "Quero ler",
+    icon: Bookmark,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+  },
+  READING: {
+    label: "Lendo",
+    icon: BookOpen,
+    color: "text-accent",
+    bg: "bg-accent/10",
+  },
+  COMPLETED: {
+    label: "Concluído",
+    icon: CheckCircle2,
+    color: "text-green-500",
+    bg: "bg-green-500/10",
+  },
+  DROPPED: {
+    label: "Abandonei",
+    icon: XCircle,
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+  },
+};
 
 const statusLabels: Record<ReadingStatus, string> = {
   WANT_TO_READ: "Quero ler",
@@ -51,12 +86,14 @@ const statusLabels: Record<ReadingStatus, string> = {
   DROPPED: "Abandonei",
 };
 
+// ─── Schema do formulário ─────────────────────────────────────────────────────
 const formSchema = z.object({
   currentPage: z.coerce.number().int().min(0, "Informe uma página válida"),
   status: z.enum(["WANT_TO_READ", "READING", "COMPLETED", "DROPPED"]),
 });
 type FormValues = z.infer<typeof formSchema>;
 
+// ─── Componente principal ─────────────────────────────────────────────────────
 export function BookManager({ initialBook }: { initialBook: Book }) {
   const { token } = useAuthContext();
   const router = useRouter();
@@ -64,8 +101,10 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [rating, setRating] = useState(initialBook.review?.rating ?? 0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState(initialBook.review?.comment ?? "");
   const [error, setError] = useState<string | null>(null);
+
   const form = useForm<z.input<typeof formSchema>, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -160,12 +199,16 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
   const pageCount = book.pageCount ?? 0;
   const progress =
     libraryInfo && pageCount > 0
-      ? (libraryInfo.currentPage / pageCount) * 100
+      ? Math.min(100, Math.round((libraryInfo.currentPage / pageCount) * 100))
       : 0;
 
+  const statusConfig = libraryInfo ? STATUS_CONFIG[libraryInfo.status] : null;
+  const StatusIcon = statusConfig?.icon;
+  const coverUrl = getCleanBookCover(book.imageUrl) || book.imageUrl;
+
   return (
-    <main className=" w-full  px-4 py-6 sm:px-6 lg:px-8">
-      {/* Ação de Retorno */}
+    <main className="w-full px-4 py-6 sm:px-6 lg:px-8">
+      {/* Botão Voltar */}
       <div className="mb-6">
         <Button
           variant="ghost"
@@ -178,293 +221,352 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
         </Button>
       </div>
 
-      {/* Layout 8 colunas (Livro) x 4 colunas (Painel Lateral de Leitura) */}
+      {/* Layout: detalhes do livro (8 colunas) + painel de leitura (4 colunas) */}
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* COLUNA ESQUERDA: Detalhes Completos do Livro (8 Colunas) */}
+        {/* ── COLUNA ESQUERDA: Dados do livro ── */}
         <article className="flex flex-col gap-8 lg:col-span-8">
-          {/* Bloco Superior: Capa + Apresentação */}
-          <section className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
-            <div className="relative mx-auto aspect-2/3 w-48 shrink-0 overflow-hidden rounded-xl border bg-muted shadow-md sm:mx-0 sm:w-56">
-              {book.imageUrl ? (
-                <Image
-                  src={book.imageUrl}
-                  alt={`Capa de ${book.title}`}
-                  fill
-                  sizes="(max-width: 640px) 192px, 224px"
-                  priority
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                  Sem capa
-                </div>
-              )}
-            </div>
+          {/* Hero: capa + título + metadados */}
+          <section className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-card via-card to-accent/10 p-6 shadow-sm sm:p-8">
+            {/* Blob decorativo */}
+            <div className="pointer-events-none absolute -right-12 -top-12 size-64 rounded-full bg-accent/8 blur-3xl" />
 
-            <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
-              {book.categories.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1.5 sm:justify-start">
-                  {book.categories.map((category) => (
-                    <Badge
-                      key={category}
-                      variant="secondary"
-                      className="text-xs"
-                    >
-                      {category}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-                  {book.title}
-                </h1>
-                {book.subtitle && (
-                  <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-                    {book.subtitle}
-                  </p>
+            <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+              {/* Capa */}
+              <div className="relative mx-auto aspect-2/3 w-44 shrink-0 overflow-hidden rounded-xl bg-muted shadow-lg ring-1 ring-border/40 sm:mx-0 sm:w-52">
+                {coverUrl ? (
+                  <Image
+                    src={coverUrl}
+                    alt={`Capa de ${book.title}`}
+                    fill
+                    sizes="(max-width: 640px) 176px, 208px"
+                    priority
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <BookOpen className="size-8 opacity-40" />
+                    <span className="px-3 text-center text-xs opacity-60">
+                      Sem capa
+                    </span>
+                  </div>
                 )}
               </div>
 
-              {book.authors.length > 0 && (
-                <p className="text-sm font-medium text-primary sm:text-base">
-                  {book.authors.join(", ")}
-                </p>
-              )}
+              {/* Informações principais */}
+              <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">
+                {/* Categorias */}
+                {book.categories.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-1.5 sm:justify-start">
+                    {book.categories.map((category) => (
+                      <Badge
+                        key={category}
+                        variant="secondary"
+                        className="text-[11px]"
+                      >
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
 
-              {/* Destaques Rápidos */}
-              {/* <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:justify-start">
-                {book.pageCount && <span>{book.pageCount} páginas</span>}
-                {book.publisher && <span>• {book.publisher}</span>}
-                {book.publishedDate && <span>• {book.publishedDate}</span>}
-              </div> */}
+                {/* Título e subtítulo */}
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+                    {book.title}
+                  </h1>
+                  {book.subtitle && (
+                    <p className="mt-1 text-base text-muted-foreground sm:text-lg">
+                      {book.subtitle}
+                    </p>
+                  )}
+                </div>
 
-              {/* Ficha Técnica Detalhada */}
-              <section className="">
-                <h2 className="text-base font-semibold tracking-tight text-foreground mb-4">
-                  Informações Detalhadas
-                </h2>
-                <dl className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-3">
+                {/* Autores */}
+                {book.authors.length > 0 && (
+                  <p className="text-sm font-semibold text-accent sm:text-base">
+                    {book.authors.join(", ")}
+                  </p>
+                )}
+
+                {/* Badge de status da biblioteca */}
+                {statusConfig && StatusIcon && (
+                  <div className="flex justify-center sm:justify-start">
+                    <Badge
+                      variant="outline"
+                      className={`gap-1.5 border-border/60 py-1 text-xs ${statusConfig.bg}`}
+                    >
+                      <StatusIcon
+                        className={`size-3.5 ${statusConfig.color}`}
+                      />
+                      <span className={statusConfig.color}>
+                        {statusConfig.label}
+                      </span>
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Ficha técnica inline */}
+                <Separator className="my-1" />
+                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-left sm:grid-cols-3">
                   {book.publisher && (
                     <div>
-                      <dt className="text-muted-foreground">Editora</dt>
-                      <dd className="mt-0.5 font-medium text-foreground">
+                      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                        Editora
+                      </dt>
+                      <dd className="mt-0.5 text-xs font-semibold text-foreground">
                         {book.publisher}
                       </dd>
                     </div>
                   )}
                   {book.publishedDate && (
                     <div>
-                      <dt className="text-muted-foreground">
-                        Data de Publicação
+                      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                        Publicação
                       </dt>
-                      <dd className="mt-0.5 font-medium text-foreground">
+                      <dd className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-foreground">
+                        <CalendarDays className="size-3 text-accent" />
                         {formatDate(book.publishedDate)}
                       </dd>
                     </div>
                   )}
-                  {book.pageCount && (
+                  {pageCount > 0 && (
                     <div>
-                      <dt className="text-muted-foreground">
-                        Total de Páginas
+                      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                        Páginas
                       </dt>
-                      <dd className="mt-0.5 font-medium text-foreground">
-                        {book.pageCount}
+                      <dd className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-foreground">
+                        <BookOpen className="size-3 text-accent" />
+                        {pageCount}
                       </dd>
                     </div>
                   )}
                   {book.isbn13 && (
                     <div>
-                      <dt className="text-muted-foreground">ISBN-13</dt>
-                      <dd className="mt-0.5 font-mono font-medium text-foreground">
+                      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                        ISBN-13
+                      </dt>
+                      <dd className="mt-0.5 font-mono text-xs font-semibold text-foreground">
                         {book.isbn13}
                       </dd>
                     </div>
                   )}
                   {book.isbn10 && (
                     <div>
-                      <dt className="text-muted-foreground">ISBN-10</dt>
-                      <dd className="mt-0.5 font-mono font-medium text-foreground">
+                      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+                        ISBN-10
+                      </dt>
+                      <dd className="mt-0.5 font-mono text-xs font-semibold text-foreground">
                         {book.isbn10}
                       </dd>
                     </div>
                   )}
                 </dl>
-              </section>
+              </div>
             </div>
           </section>
 
-          {/* Sinopse Editorial */}
+          {/* Sinopse */}
           {book.description && (
-            <section className="space-y-3">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            <section className="space-y-3 rounded-xl border border-border/60 bg-card p-5 sm:p-6">
+              <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Hash className="size-3.5" />
                 Sinopse
               </h2>
               <div
-                className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-muted-foreground [&>p]:mb-3"
+                className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-muted-foreground [&_p]:mb-3"
                 dangerouslySetInnerHTML={{ __html: book.description }}
               />
             </section>
           )}
         </article>
 
-        {/* COLUNA DIREITA: Card Lateral de Leitura (4 Colunas, Sticky) */}
+        {/* ── COLUNA DIREITA: Painel de leitura (sticky) ── */}
         <aside className="lg:col-span-4 lg:sticky lg:top-6">
           {libraryInfo ? (
-            <div className="flex flex-col gap-6 rounded-2xl border bg-card p-6 shadow-sm">
-              {/* Cabeçalho do Painel Lateral */}
-              <div className="flex items-center justify-between border-b pb-4">
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">
+            <Card className="overflow-hidden border-border/70 shadow-sm">
+              {/* Cabeçalho do painel com gradiente sutil */}
+              <CardHeader className="bg-gradient-to-br from-card to-accent/5 border-b border-border/60 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-semibold">
                     Minha Leitura
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Registro e métricas
-                  </p>
+                  </CardTitle>
+                  {statusConfig && StatusIcon && (
+                    <Badge
+                      variant="outline"
+                      className={`gap-1.5 border-border/60 py-0.5 text-[11px] ${statusConfig.bg}`}
+                    >
+                      <StatusIcon className={`size-3 ${statusConfig.color}`} />
+                      <span className={statusConfig.color}>
+                        {statusConfig.label}
+                      </span>
+                    </Badge>
+                  )}
                 </div>
-                <Badge variant="outline" className="px-2.5 py-0.5 font-medium">
-                  {statusLabels[libraryInfo.status]}
-                </Badge>
-              </div>
 
-              {/* Progresso Dinâmico */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    Pág. {libraryInfo.currentPage} de {pageCount || "?"}
-                  </span>
-                  <span className="font-semibold text-primary">
-                    {Math.round(progress)}%
-                  </span>
-                </div>
-                <Progress value={progress} className="h-2.5" />
-              </div>
+                {/* Barra de progresso */}
+                {pageCount > 0 && (
+                  <div className="mt-4 space-y-1.5">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>
+                        Pág. {libraryInfo.currentPage} de {pageCount}
+                      </span>
+                      <span className="font-semibold text-accent">
+                        {progress}%
+                      </span>
+                    </div>
+                    <Progress value={progress} className="h-2" />
+                  </div>
+                )}
+              </CardHeader>
 
-              {/* Formulário de Atualização */}
-              <form
-                onSubmit={form.handleSubmit(saveChanges)}
-                className="space-y-4"
-              >
-                <Field>
-                  <FieldLabel
-                    htmlFor="currentPage"
-                    className="text-xs font-medium"
-                  >
-                    Página atual
-                  </FieldLabel>
-                  <Input
-                    id="currentPage"
-                    type="number"
-                    min={0}
-                    max={pageCount || undefined}
-                    className="mt-1"
-                    {...form.register("currentPage")}
-                  />
-                  <FieldError errors={[form.formState.errors.currentPage]} />
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="status" className="text-xs font-medium">
-                    Status da leitura
-                  </FieldLabel>
-                  <Controller
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger id="status" className="mt-1">
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(statusLabels).map(
-                            ([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </Field>
-
-                {error && <p className="text-xs text-destructive">{error}</p>}
-
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full gap-2"
+              <CardContent className="flex flex-col gap-5 p-5">
+                {/* Formulário de atualização */}
+                <form
+                  onSubmit={form.handleSubmit(saveChanges)}
+                  className="space-y-4"
                 >
-                  <Save className="size-4" />
-                  {saving ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </form>
+                  <Field>
+                    <FieldLabel
+                      htmlFor="currentPage"
+                      className="text-xs font-medium"
+                    >
+                      Página atual
+                    </FieldLabel>
+                    <Input
+                      id="currentPage"
+                      type="number"
+                      min={0}
+                      max={pageCount || undefined}
+                      className="mt-1"
+                      {...form.register("currentPage")}
+                    />
+                    <FieldError errors={[form.formState.errors.currentPage]} />
+                  </Field>
 
-              {/* Seção de Avaliação (Ativa ao Concluir) */}
-              {libraryInfo.status === "COMPLETED" && (
-                <div className="space-y-3 border-t pt-5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Avaliação
-                    </h3>
-                  </div>
-
-                  <div
-                    className="flex gap-1"
-                    role="radiogroup"
-                    aria-label="Avaliação do livro"
-                  >
-                    {Array.from({ length: 5 }, (_, index) => {
-                      const value = index + 1;
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
-                          onClick={() => setRating(value)}
-                          className="transition-transform hover:scale-110"
+                  <Field>
+                    <FieldLabel
+                      htmlFor="status"
+                      className="text-xs font-medium"
+                    >
+                      Status da leitura
+                    </FieldLabel>
+                    <Controller
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
                         >
-                          <Star
-                            className={`size-5 ${
-                              value <= rating
-                                ? "fill-amber-400 text-amber-400"
-                                : "text-muted-foreground/30"
-                            }`}
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
+                          <SelectTrigger id="status" className="mt-1">
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(statusLabels).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </Field>
 
-                  <Textarea
-                    value={comment}
-                    onChange={(event) => setComment(event.target.value)}
-                    rows={3}
-                    maxLength={5000}
-                    placeholder="Escreva sua opinião rápida..."
-                    className="min-h-20 resize-none text-xs"
-                  />
+                  {error && <p className="text-xs text-destructive">{error}</p>}
 
                   <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={saveReview}
+                    type="submit"
                     disabled={saving}
+                    className="w-full gap-2 bg-accent text-white hover:bg-accent/90"
                   >
-                    {saving ? "Gravando..." : "Salvar Avaliação"}
+                    {saving ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Save className="size-4" />
+                    )}
+                    {saving ? "Salvando..." : "Salvar Alterações"}
                   </Button>
-                </div>
-              )}
+                </form>
 
-              {/* Ação Destrutiva */}
-              <div className="border-t pt-4">
+                {/* Seção de avaliação — ativa apenas para status COMPLETED */}
+                {libraryInfo.status === "COMPLETED" && (
+                  <>
+                    <Separator />
+                    <div className="space-y-4">
+                      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <MessageSquareText className="size-3.5" />
+                        Avaliação
+                      </h3>
+
+                      {/* Estrelas interativas */}
+                      <div
+                        className="flex gap-1"
+                        role="radiogroup"
+                        aria-label="Avaliação do livro"
+                      >
+                        {Array.from({ length: 5 }, (_, i) => {
+                          const value = i + 1;
+                          const isActive = value <= (hoverRating || rating);
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              aria-label={`${value} estrela${value > 1 ? "s" : ""}`}
+                              onClick={() => setRating(value)}
+                              onMouseEnter={() => setHoverRating(value)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              className="transition-transform hover:scale-110"
+                            >
+                              <Star
+                                className={`size-6 transition-colors ${
+                                  isActive
+                                    ? "fill-accent text-accent"
+                                    : "text-muted-foreground/30"
+                                }`}
+                              />
+                            </button>
+                          );
+                        })}
+                        {rating > 0 && (
+                          <span className="ml-1 self-center text-xs text-muted-foreground">
+                            {rating}/5
+                          </span>
+                        )}
+                      </div>
+
+                      <Textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        rows={3}
+                        maxLength={5000}
+                        placeholder="Escreva sua opinião rápida sobre o livro..."
+                        className="min-h-20 resize-none text-xs"
+                      />
+
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="w-full gap-2 text-xs"
+                        onClick={saveReview}
+                        disabled={saving}
+                      >
+                        {saving ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Save className="size-3.5" />
+                        )}
+                        {saving ? "Gravando..." : "Salvar Avaliação"}
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {/* Remover da biblioteca */}
+                <Separator />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -472,29 +574,43 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
                   onClick={removeBook}
                   disabled={removing}
                 >
-                  <Trash2 className="size-3.5" />
+                  {removing ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="size-3.5" />
+                  )}
                   {removing ? "Removendo..." : "Remover da Biblioteca"}
                 </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ) : (
-            /* Caso o livro não pertença à biblioteca */
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-card p-8 text-center shadow-xs">
-              <BookOpen className="size-10 text-muted-foreground/60 mb-3" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Fora da Biblioteca
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Adicione este livro à sua coleção para registrar seu progresso e
-                notas.
-              </p>
+            /* Livro fora da biblioteca */
+            <Card className="flex flex-col items-center justify-center gap-4 border-dashed bg-card p-8 text-center shadow-xs">
+              <div className="flex size-14 items-center justify-center rounded-full bg-accent/10">
+                <BookOpen className="size-7 text-accent" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Ainda não está na sua biblioteca
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Adicione para registrar seu progresso, anotar a página atual e
+                  avaliar quando terminar.
+                </p>
+              </div>
               <Button
                 onClick={addToLibrary}
-                className="mt-5 w-full gap-2 text-xs"
+                disabled={saving}
+                className="mt-1 w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                <Plus className="size-4" /> Adicionar à Minha Biblioteca
+                {saving ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Plus className="size-4" />
+                )}
+                {saving ? "Adicionando..." : "Adicionar à Minha Biblioteca"}
               </Button>
-            </div>
+            </Card>
           )}
         </aside>
       </div>

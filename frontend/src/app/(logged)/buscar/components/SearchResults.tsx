@@ -39,6 +39,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
+        setError(null);
 
         const result = await searchBooks(query, page, 10, token ?? "");
         if (!result?.data) return;
@@ -58,7 +59,8 @@ export const SearchResults = ({ query }: SearchResultProps) => {
         }
       } catch (error) {
         console.error("Erro ao buscar livros: ", error);
-        setError("Erro ao buscar livros");
+        const msg = error instanceof Error ? error.message : "Erro ao buscar livros";
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -122,7 +124,18 @@ export const SearchResults = ({ query }: SearchResultProps) => {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 rounded-xl" />
+            <div
+              key={i}
+              className="flex gap-4 rounded-xl border border-border/60 bg-card p-4"
+            >
+              <Skeleton className="h-36 w-[110px] shrink-0 rounded-lg" />
+              <div className="flex flex-1 flex-col gap-2 pt-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-3 w-1/4" />
+                <Skeleton className="mt-auto h-3 w-1/3" />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -151,13 +164,15 @@ export const SearchResults = ({ query }: SearchResultProps) => {
 
   return (
     <>
-      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <p className="text-sm text-muted-foreground col-span-full">
-          {totalItems} {totalItems === 1 ? "resultado" : "resultados"} para{" "}
-          <span className="font-semibold text-foreground">
-            &quot;{query}&quot;
-          </span>
-        </p>
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="col-span-full flex items-center justify-between pb-1">
+          <p className="text-sm text-muted-foreground">
+            {totalItems} {totalItems === 1 ? "resultado encontrado" : "resultados encontrados"} para{" "}
+            <span className="font-semibold text-foreground">
+              &quot;{query}&quot;
+            </span>
+          </p>
+        </div>
 
         {books.map((book, index) => (
           <BookCard
