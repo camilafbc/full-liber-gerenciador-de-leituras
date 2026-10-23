@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: "books.google.com",
         pathname: "/books/publisher/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
   },
 };

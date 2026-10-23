@@ -6,14 +6,10 @@ export function middleware(request: NextRequest): NextResponse {
   const refreshToken = request.cookies.get("liber_refresh_token")?.value;
   const isAuthenticated = Boolean(refreshToken);
 
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/signup");
-  const isPublicRoute = isAuthRoute || pathname.startsWith("/auth-callback");
-
-  // Rota raiz: redireciona conforme o estado de autenticação
-  if (pathname === "/") {
-    const targetPath = isAuthenticated ? "/home" : "/login";
-    return NextResponse.redirect(new URL(targetPath, request.url));
-  }
+  const isAuthRoute =
+    pathname.startsWith("/login") || pathname.startsWith("/signup");
+  const isPublicRoute =
+    isAuthRoute || pathname.startsWith("/auth-callback") || pathname === "/";
 
   // Usuário não autenticado tentando acessar página protegida
   if (!isAuthenticated && !isPublicRoute) {

@@ -53,7 +53,7 @@ export const LoginForm = () => {
             Use seu e-mail ou continue com o Google.
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="py-6">
           <FieldSet className="w-full">
             <FieldGroup className="w-full gap-4">
               <Controller
