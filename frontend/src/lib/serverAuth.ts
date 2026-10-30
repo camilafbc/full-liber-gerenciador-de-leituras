@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { getApiUrl } from "./apiUrl";
 
 /**
  * Obtém o access token em componentes de servidor (Server Components).
@@ -21,7 +22,7 @@ export async function getServerAuthToken(): Promise<string | null> {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+      `${getApiUrl()}/auth/refresh`,
       {
         method: "POST",
         headers: {

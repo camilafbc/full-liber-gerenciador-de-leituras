@@ -1,5 +1,6 @@
 import { Book } from "@/types/Book";
 import { getServerAuthToken } from "@/lib/serverAuth";
+import { getApiUrl } from "@/lib/apiUrl";
 import { redirect } from "next/navigation";
 import { BookManager } from "./BookManager";
 
@@ -18,7 +19,7 @@ export default async function BookPage({ params }: BookPageProps) {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/books/search/${id}`,
+      `${getApiUrl()}/books/search/${id}`,
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",

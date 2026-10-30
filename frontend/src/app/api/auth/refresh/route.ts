@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getApiUrl } from "@/lib/apiUrl";
 
 export async function POST() {
   try {
@@ -16,7 +17,7 @@ export async function POST() {
     }
 
     const refreshResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+      `${getApiUrl()}/auth/refresh`,
       {
         method: "POST",
         headers: {

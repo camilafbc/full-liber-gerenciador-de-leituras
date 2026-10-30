@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instala dependências necessárias para compilação (ex: bcrypt se necessário)
+RUN apk add --no-cache python3 make g++
+
+COPY package*.json ./
+
+# Instala dependências de desenvolvimento e produção
+RUN npm install
+
+# Copia o restante do código
+COPY . .
+
+# Gera os artefatos do Prisma Client
+RUN npx prisma generate
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

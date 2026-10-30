@@ -1,4 +1,5 @@
 // 📁 src/api/client.ts
+import { getApiUrl } from "@/lib/apiUrl";
 
 type RefreshListener = (token: string | null) => void;
 
@@ -20,7 +21,7 @@ const addRefreshSubscriber = (callback: (token: string | null) => void) => {
   refreshSubscribers.push(callback);
 };
 
-const buildUrl = (path: string) => `${process.env.NEXT_PUBLIC_API_URL}${path}`;
+const buildUrl = (path: string) => `${getApiUrl()}${path}`;
 
 export const apiFetchClient = async (
   url: string,

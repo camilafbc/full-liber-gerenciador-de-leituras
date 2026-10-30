@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getApiUrl } from "@/lib/apiUrl";
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
       path: "/",
     });
 
-    const me = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+    const me = await fetch(`${getApiUrl()}/auth/me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,

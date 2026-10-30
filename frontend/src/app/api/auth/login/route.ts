@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getApiUrl } from "@/lib/apiUrl";
 
 export async function POST(request: Request) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = getApiUrl();
 
   try {
     const { email, password } = await request.json();
