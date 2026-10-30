@@ -13,7 +13,7 @@ interface UserData {
   uuid: string;
   name: string;
   email: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 interface SessionData {

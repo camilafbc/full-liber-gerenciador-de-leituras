@@ -8,7 +8,6 @@ import {
   BookSearchIcon,
   House,
   LibraryBigIcon,
-  Settings,
   UserRoundIcon,
 } from "lucide-react";
 import { ReactNode } from "react";
@@ -47,7 +46,14 @@ export default function Layout({ children }: Props) {
     <SidebarLayout
       key={"sidebarlayout"}
       headerTitle={`Olá, ${user?.name}!`}
-      userMenu={<UserMenu name={user?.name} email={user?.email} buttons={[]} />}
+      userMenu={
+        <UserMenu
+          name={user?.name}
+          email={user?.email}
+          avatarImage={user?.avatarUrl ?? undefined}
+          buttons={[]}
+        />
+      }
       logo={<TextLogo width={83} className="fill-white" />}
       ButtonsMenu={menuButtons}
     >

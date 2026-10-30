@@ -105,6 +105,7 @@ export const signIn: RequestHandler = async (req, res) => {
         uuid: user.uuid,
         name: user.name,
         email: user.email,
+        avatarUrl: user.avatarUrl,
         avatar: user.avatarUrl,
       },
     });
@@ -128,6 +129,7 @@ export const userData: RequestHandler = async (req, res) => {
         uuid: user.uuid,
         name: user.name,
         email: user.email,
+        avatarUrl: user.avatarUrl,
         avatar: user.avatarUrl,
       },
     });

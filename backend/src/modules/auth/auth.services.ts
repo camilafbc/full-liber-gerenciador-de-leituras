@@ -69,9 +69,11 @@ export const createUser = async (
 
     return {
       user: {
+        id: newUser.id,
         name,
         email,
         uuid: newUser.uuid,
+        avatarUrl: newUser.avatarUrl,
         imageUrl: newUser.avatarUrl,
       },
       account: { uuid: account.uuid },
