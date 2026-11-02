@@ -308,7 +308,7 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Seção "Lendo Agora" com Card no estilo solicitado */}
+      {/* Seção "Lendo Agora"*/}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -345,7 +345,12 @@ export default function HomePage() {
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {stats.wantToRead.length > 0 && (
-                <Button variant="outline" size="sm" asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="dark:bg-accent"
+                  asChild
+                >
                   <Link href="/biblioteca">Escolher da lista Quero Ler</Link>
                 </Button>
               )}
@@ -439,7 +444,6 @@ export default function HomePage() {
                   key={item.book.uuid ?? item.book.externalId}
                   href={`/books/${item.book.externalId}`}
                   className="group block"
-                  // className="group block w-40 sm:w-45 shrink-0"
                 >
                   <Card className="overflow-hidden border border-border/70 transition-all hover:-translate-y-1 hover:shadow-md">
                     <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">

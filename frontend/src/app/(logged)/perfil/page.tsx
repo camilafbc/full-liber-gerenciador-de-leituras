@@ -15,7 +15,6 @@ import {
   BookOpen,
   KeyRound,
   Mail,
-  ShieldCheck,
   Sparkles,
   UserCheck,
   UserRound,

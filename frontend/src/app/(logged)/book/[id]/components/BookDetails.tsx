@@ -1,9 +1,10 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { Book } from "@/types/Book";
 
 interface BookDetailsProps {
-  data: any;
+  data: Book;
 }
 
 export const BookDetails = ({ data }: BookDetailsProps) => {

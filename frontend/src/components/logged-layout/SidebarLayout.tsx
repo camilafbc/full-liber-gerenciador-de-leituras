@@ -2,7 +2,7 @@
 
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, useSyncExternalStore, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -38,14 +38,11 @@ export default function SidebarLayout({
   logo,
 }: SidebarLayoutProps) {
   const { isCollapsed, toggle } = useSidebarStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -60,7 +57,7 @@ export default function SidebarLayout({
   }, []);
 
   const toggleSidebar = () => {
-    isMobile ? setMobileMenuOpen(!mobileMenuOpen) : toggle();
+    if (isMobile) { setMobileMenuOpen((prev) => !prev); } else { toggle(); }
   };
 
   if (!isHydrated) {
@@ -174,7 +171,7 @@ export default function SidebarLayout({
           )}
         >
           <div
-            className={`w-full overflow-hidden ${isMobile && "max-w-[100vw]"} ${!isMobile && !isCollapsed && "max-w-[calc(100vw-16rem)]"} ${isCollapsed && "max-w-[calc(100vw-4rem)]"} p-6`}
+            className={`w-full overflow-hidden ${isMobile && "max-w-[100vw]"} ${!isMobile && !isCollapsed && "max-w-[calc(100vw-16rem)]"} ${isCollapsed && !isMobile && "max-w-[calc(100vw-4rem)]"} p-6`}
           >
             {children}
           </div>

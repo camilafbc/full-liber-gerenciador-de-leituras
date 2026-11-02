@@ -41,7 +41,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
         setLoading(true);
         setError(null);
 
-        const result = await searchBooks(query, page, 10, token ?? "");
+        const result = await searchBooks(query, page, 15, token ?? "");
         if (!result?.data) return;
 
         setBooks(result.data);
@@ -59,7 +59,8 @@ export const SearchResults = ({ query }: SearchResultProps) => {
         }
       } catch (error) {
         console.error("Erro ao buscar livros: ", error);
-        const msg = error instanceof Error ? error.message : "Erro ao buscar livros";
+        const msg =
+          error instanceof Error ? error.message : "Erro ao buscar livros";
         setError(msg);
       } finally {
         setLoading(false);
@@ -167,7 +168,11 @@ export const SearchResults = ({ query }: SearchResultProps) => {
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div className="col-span-full flex items-center justify-between pb-1">
           <p className="text-sm text-muted-foreground">
-            {totalItems} {totalItems === 1 ? "resultado encontrado" : "resultados encontrados"} para{" "}
+            {totalItems}{" "}
+            {totalItems === 1
+              ? "resultado encontrado"
+              : "resultados encontrados"}{" "}
+            para{" "}
             <span className="font-semibold text-foreground">
               &quot;{query}&quot;
             </span>

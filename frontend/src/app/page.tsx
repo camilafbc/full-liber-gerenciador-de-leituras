@@ -2,10 +2,17 @@ import { Logo } from "@/components/Logo";
 import { TextLogo } from "@/components/TextLogo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Library, Sparkles } from "lucide-react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("liber_refresh_token");
+
+  if (refreshToken) redirect("/home");
+
   return (
     <main className="min-h-screen overflow-hidden bg-primary text-primary-foreground [--background:oklch(99.65%_0.002_247.84)] [--foreground:oklch(0.145_0_0)] [--primary:oklch(20.7%_0.038_265.07)] [--primary-foreground:oklch(0.97_0.014_254.604)]">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 sm:px-10 lg:px-12">
@@ -33,7 +40,7 @@ export default function Home() {
             <Button
               asChild
               variant="secondary"
-              className="font-semibold bg-accent"
+              className="bg-accent font-semibold text-accent-foreground hover:bg-accent/90"
             >
               <Link href="/signup">Criar conta</Link>
             </Button>
@@ -58,7 +65,7 @@ export default function Home() {
                 asChild
                 size="lg"
                 variant="secondary"
-                className="h-12 px-6 font-semibold bg-accent"
+                className="h-12 bg-accent px-6 font-semibold text-accent-foreground hover:bg-accent/90"
               >
                 <Link href="/signup">
                   Começar agora

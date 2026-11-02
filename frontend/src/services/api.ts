@@ -1,6 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function apiPost<T>(endpoint: string, body: any): Promise<T> {
+export async function apiPost<T>(endpoint: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
     method: "POST",
     headers: {
