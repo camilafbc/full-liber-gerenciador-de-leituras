@@ -30,7 +30,11 @@ describe("Módulo de Autenticação - Login (SignIn)", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.accessToken).not.toBeUndefined();
-    expect(response.body.refreshToken).not.toBeUndefined();
+    expect(response.headers["set-cookie"]).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^liber_bk_refresh_token=.+/),
+      ]),
+    );
   });
 
   it("Should not be allowed login with a different password", async () => {

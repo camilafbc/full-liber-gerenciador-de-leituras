@@ -96,7 +96,7 @@ export const signIn: RequestHandler = async (req, res) => {
 
     res.cookie("liber_bk_refresh_token", newRefreshToken.token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
     return res.status(200).json({
@@ -170,10 +170,11 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
 export const refreshSession: RequestHandler = async (req, res) => {
   try {
-    const refreshToken = req.cookies.liber_bk_refresh_token;
+    const refreshToken =
+      req.cookies?.liber_bk_refresh_token ?? req.body?.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({ error: "Refresh token não fornecido!" });
+      return res.status(400).json({ error: "Refresh token é obrigatório!" });
     }
 
     const savedToken = await findRefreshToken(refreshToken);

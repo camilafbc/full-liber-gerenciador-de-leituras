@@ -1,20 +1,34 @@
 import request from "supertest";
+
+jest.mock("passport-google-oauth20", () => ({
+  Strategy: jest.fn().mockImplementation(() => ({})),
+}));
+
+jest.mock("passport", () => {
+  const mockPassport = {
+    use: jest.fn(),
+    initialize: jest.fn(() => (req: any, res: any, next: any) => next()),
+    authenticate: jest.fn((strategy: string, options?: any) => {
+      return (req: any, res: any, next: any) => {
+        req.user = {
+          uuid: "uuid-ficticio-do-google-123",
+          email: "google.user@example.com",
+          name: "Leitor Google",
+        };
+        next();
+      };
+    }),
+  };
+
+  return {
+    __esModule: true,
+    default: mockPassport,
+    ...mockPassport,
+  };
+});
+
 import server from "../../../server";
 import { prisma } from "../../../libs/prisma";
-
-jest.mock("passport", () => ({
-  authenticate: (strategy: string, options: any) => {
-    // retorna um middleware fake com os dados do usuário que viriam do passport
-    return (req: any, res: any, next: any) => {
-      req.user = {
-        uuid: "uuid-ficticio-do-google-123",
-        email: "google.user@example.com",
-        name: "Leitor Google",
-      };
-      next();
-    };
-  },
-}));
 
 describe("Módulo de Autenticação - Google OAuth2 Callback", () => {
   beforeAll(async () => {
@@ -43,11 +57,5 @@ describe("Módulo de Autenticação - Google OAuth2 Callback", () => {
     expect(response.headers.location).toContain(
       "http://localhost:3000/auth-callback?token=",
     );
-
-    // garantir que o token gerado é um JWT válido
-    // const redirectUrl = response.headers.location;
-    // const tokenExtraido = redirectUrl.split("token=")[1];
-    // expect(tokenExtraido).toBeDefined();
-    // expect(tokenExtraido.split(".").length).toBe(3); //
   });
 });

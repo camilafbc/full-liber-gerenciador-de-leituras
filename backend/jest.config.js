@@ -5,6 +5,7 @@ module.exports = {
   },
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.spec.ts'],
+  maxWorkers: 1,
   clearMocks: true,
   transformIgnorePatterns: [
     'node_modules/(?!@prisma/)',
