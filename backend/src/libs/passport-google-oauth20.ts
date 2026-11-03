@@ -8,12 +8,15 @@ import {
 } from "../modules/auth/auth.services";
 import { prisma } from "./prisma";
 
+const backendUrl =
+  process.env.ACCESS_URL || `http://localhost:${process.env.PORT || 3333}`;
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      callbackURL: "/auth/google/callback",
+      callbackURL: `${backendUrl}/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
