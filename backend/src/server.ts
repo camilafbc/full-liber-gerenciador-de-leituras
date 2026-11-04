@@ -16,6 +16,9 @@ import cookieParser from "cookie-parser";
 
 const server = express();
 
+// config de deploy
+server.set("trust proxy", 1);
+
 server.use(
   cors({
     origin: process.env.ACCESS_URL,
