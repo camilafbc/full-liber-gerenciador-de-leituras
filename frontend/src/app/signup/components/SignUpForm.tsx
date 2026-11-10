@@ -21,6 +21,7 @@ import { useSignup } from "@/hooks/useSignup";
 import { SignUpInput, signUpSchema } from "@/schemas/signUp.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 
@@ -50,7 +51,7 @@ export function SignUpForm() {
         <CardHeader className="border-b">
           <CardTitle className="text-xl">Criar conta</CardTitle>
           <CardDescription>
-            Preencha os dados abaixo para começar a usar o Liber.
+            Preencha os dados abaixo ou continue com o Google.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -140,6 +141,18 @@ export function SignUpForm() {
           <Button type="submit" disabled={loading} className="w-full">
             {loading && <Loader2 className="animate-spin" />}
             {loading ? "Criando conta..." : "Criar conta"}
+          </Button>
+          <Button type="button" variant="outline" className="w-full" asChild>
+            <a href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}>
+              <Image
+                src="/google-color-svgrepo-com.svg"
+                alt=""
+                width={16}
+                height={16}
+                aria-hidden
+              />
+              Entrar com o Google
+            </a>
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Já possui uma conta?{" "}
