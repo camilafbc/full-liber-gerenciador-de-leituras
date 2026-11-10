@@ -59,4 +59,24 @@ describe("Módulo de Autenticação - Login (SignIn)", () => {
     expect(response.status).toBe(400);
     expect(response.body.error).not.toBeUndefined();
   });
+
+  it("Should return 400 when user registered with social login has no passwordHash", async () => {
+    const socialEmail = "social.user@example.com";
+    await prisma.user.create({
+      data: {
+        name: "Social User",
+        email: socialEmail,
+        passwordHash: null,
+      },
+    });
+
+    const response = await request(server).post("/auth/signin").send({
+      email: socialEmail,
+      password: "@Teste123",
+      name: "Social User",
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toContain("Google");
+  });
 });

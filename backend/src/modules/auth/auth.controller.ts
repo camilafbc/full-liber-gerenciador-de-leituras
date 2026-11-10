@@ -75,9 +75,16 @@ export const signIn: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "E-mail não cadastrado" });
     }
 
+    if (!user.passwordHash) {
+      return res.status(400).json({
+        error:
+          "Esta conta foi cadastrada com login social (Google) ou não possui senha definida. Acesse utilizando o Google.",
+      });
+    }
+
     const passwordCompare = await bcrypt.compare(
       data.data.password,
-      user.passwordHash as string,
+      user.passwordHash,
     );
 
     if (!passwordCompare) {
@@ -157,7 +164,7 @@ export const googleCallback: RequestHandler = async (req, res) => {
     );
 
     const refreshToken = await generateRefreshToken(user.uuid);
-    const frontendUrl = process.env.ACCESS_URL || "http://localhost:3000";
+    const frontendUrl = process.env.APP_URL || "http://localhost:3000";
     return res.redirect(
       `${frontendUrl}/auth-callback?token=${accessToken}&refresh=${refreshToken.token}`,
     );
