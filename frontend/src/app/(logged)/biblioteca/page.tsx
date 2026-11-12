@@ -166,7 +166,7 @@ function LibraryCard({ item }: { item: LibraryBook }) {
 
   return (
     <Link href={`/books/${book.externalId}`} className="group block h-full">
-      <Card className="flex h-full flex-col overflow-hidden border-border/60 bg-card transition-all duration-200 hover:-translate-y-1 hover:border-border hover:shadow-md">
+      <Card className="flex h-full flex-col overflow-hidden border-border/60 bg-card transition-all duration-200 hover:-translate-y-1 hover:border-border hover:shadow-md pt-0">
         {/* Capa com proporção 2:3 de livro e tratamento de imagem */}
         <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">
           {cleanCover ? (
@@ -203,7 +203,7 @@ function LibraryCard({ item }: { item: LibraryBook }) {
         </div>
 
         {/* Informações do livro */}
-        <CardContent className="flex flex-1 flex-col justify-between gap-3 p-3 sm:p-4">
+        <CardContent className="flex flex-1 flex-col justify-between gap-3 p-3 sm:p-2">
           <div className="space-y-1">
             <h3
               className="line-clamp-2 text-sm font-semibold leading-tight text-foreground transition-colors group-hover:text-primary"
@@ -425,7 +425,7 @@ export default function BibliotecaPage() {
               }
             />
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {filteredBooks.map((item) => (
                 <LibraryCard
                   key={item.book.uuid ?? item.book.externalId}

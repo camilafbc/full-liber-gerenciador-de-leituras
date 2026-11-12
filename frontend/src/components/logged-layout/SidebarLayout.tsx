@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/useSidebarStore";
+import { Greeting } from "./Greeting";
 
 type ButtonsMenu = {
   icon: ReactNode;
@@ -29,7 +30,8 @@ type ButtonsMenu = {
 interface SidebarLayoutProps {
   ButtonsMenu?: ButtonsMenu[];
   sidebarFooter?: ReactNode;
-  headerTitle: string;
+  headerTitle?: ReactNode;
+  userName?: string;
   children: ReactNode;
   userMenu: ReactNode;
   logo: ReactNode;
@@ -39,6 +41,7 @@ export default function SidebarLayout({
   ButtonsMenu,
   sidebarFooter,
   headerTitle,
+  userName,
   children,
   userMenu,
   logo,
@@ -133,9 +136,7 @@ export default function SidebarLayout({
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      {/* ============================================================== */}
       {/* 1. SIDEBAR DESKTOP (md:flex)                                   */}
-      {/* ============================================================== */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-40 hidden md:flex flex-col transition-all duration-300 ease-in-out select-none",
@@ -203,9 +204,7 @@ export default function SidebarLayout({
         )}
       </aside>
 
-      {/* ============================================================== */}
       {/* 2. DRAWER MOBILE LATERAL (Sheet do Shadcn)                      */}
-      {/* ============================================================== */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent
           side="left"
@@ -254,9 +253,8 @@ export default function SidebarLayout({
         </SheetContent>
       </Sheet>
 
-      {/* ============================================================== */}
       {/* 3. ÁREA DE CONTEÚDO E HEADER                                  */}
-      {/* ============================================================== */}
+
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col transition-[margin] duration-300 ease-in-out",
@@ -278,9 +276,17 @@ export default function SidebarLayout({
               <Menu className="size-5" />
             </Button>
 
-            <h1 className="truncate text-base sm:text-lg md:text-xl font-semibold tracking-tight text-foreground">
-              {headerTitle}
-            </h1>
+            {headerTitle ? (
+              typeof headerTitle === "string" ? (
+                <h1 className="truncate text-base sm:text-lg md:text-xl font-semibold tracking-tight text-foreground">
+                  {headerTitle}
+                </h1>
+              ) : (
+                headerTitle
+              )
+            ) : (
+              <Greeting name={userName} />
+            )}
           </div>
 
           {/* Lado Direito do Header (UserMenu / Ações) */}
@@ -289,14 +295,13 @@ export default function SidebarLayout({
 
         {/* Conteúdo Principal */}
         <main className="flex-1 bg-background pb-24 md:pb-10">
-          <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-9xl p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>
 
-        {/* ============================================================ */}
         {/* 4. BARRA DE NAVEGAÇÃO INFERIOR MOBILE (Bottom Bar)            */}
-        {/* ============================================================ */}
+
         {ButtonsMenu && ButtonsMenu.length > 0 && (
           <nav
             className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-border/80 bg-background/90 px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur-lg md:hidden shadow-lg"
