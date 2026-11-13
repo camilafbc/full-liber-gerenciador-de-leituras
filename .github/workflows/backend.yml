@@ -1,0 +1,88 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: liber_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Configurar arquivo de ambiente para testes (.env.test)
+        env:
+          ENV_TEST: ${{ secrets.ENV_TEST }}
+        run: |
+          if [ -n "$ENV_TEST" ]; then
+            echo "Carregando variáveis de teste a partir da secret ENV_TEST do GitHub..."
+            echo "$ENV_TEST" > .env.test
+          else
+            echo "⚠️ Secret ENV_TEST não encontrada no GitHub. Gerando variáveis padrão (mock) para o container de testes..."
+            cat <<EOF > .env.test
+          DATABASE_URL="postgresql://postgres:postgrespassword@localhost:5432/liber_test?schema=public"
+          JWT_SECRET="test-jwt-secret-key-actions"
+          REFRESH_TOKEN_SECRET="test-refresh-token-secret-key-actions"
+          GOOGLE_CLIENT_ID="mock-google-client-id"
+          GOOGLE_CLIENT_SECRET="mock-google-client-secret"
+          GOOGLE_CALLBACK_URL="http://localhost:3000/auth/google/callback"
+          APP_URL="http://localhost:3000"
+          ACCESS_URL="http://localhost:3333"
+          PORT=3000
+          EOF
+          fi
+
+      - name: Gerar Prisma Client
+        run: npx prisma generate
+
+      - name: Aplicar migrações no banco de dados de teste
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/liber_test?schema=public"
+
+      - name: Validar compilação TypeScript (Build)
+        run: npm run build
+
+      - name: Executar testes automatizados (Jest)
+        run: npm test

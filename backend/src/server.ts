@@ -20,22 +20,9 @@ const server = express();
 // config de deploy
 server.set("trust proxy", 1);
 
-const allowedOrigins = [
-  process.env.APP_URL,
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
-].filter(Boolean) as string[];
-
 server.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-        return callback(null, true);
-      }
-      return callback(new Error("Bloqueado pelo CORS"));
-    },
+    origin: process.env.APP_URL,
     credentials: true,
   }),
 );
