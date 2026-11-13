@@ -4,6 +4,7 @@ import SidebarLayout from "@/components/logged-layout/SidebarLayout";
 import UserMenu from "@/components/logged-layout/UserMenu";
 import { TextLogo } from "@/components/TextLogo";
 import { useAuthContext } from "@/context/authContext";
+import { AdvisorChatWidget } from "@/components/AdvisorChatWidget";
 import {
   BookSearchIcon,
   House,
@@ -45,7 +46,7 @@ export default function Layout({ children }: Props) {
   return (
     <SidebarLayout
       key={"sidebarlayout"}
-      headerTitle={`Olá, ${user?.name}!`}
+      userName={user?.name}
       userMenu={
         <UserMenu
           name={user?.name}
@@ -58,6 +59,7 @@ export default function Layout({ children }: Props) {
       ButtonsMenu={menuButtons}
     >
       {children}
+      <AdvisorChatWidget />
     </SidebarLayout>
   );
 }

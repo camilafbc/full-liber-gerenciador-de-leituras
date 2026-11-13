@@ -345,13 +345,8 @@ export default function HomePage() {
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {stats.wantToRead.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="dark:bg-accent"
-                  asChild
-                >
-                  <Link href="/biblioteca">Escolher da lista Quero Ler</Link>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/biblioteca">Escolher da lista </Link>
                 </Button>
               )}
               <Button size="sm" asChild>
@@ -445,7 +440,7 @@ export default function HomePage() {
                   href={`/books/${item.book.externalId}`}
                   className="group block"
                 >
-                  <Card className="overflow-hidden border border-border/70 transition-all hover:-translate-y-1 hover:shadow-md">
+                  <Card className="overflow-hidden border border-border/70 transition-all hover:-translate-y-1 hover:shadow-md pt-0">
                     <div className="relative aspect-2/3 w-full overflow-hidden bg-muted">
                       {cover ? (
                         <Image

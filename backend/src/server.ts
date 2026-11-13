@@ -8,6 +8,7 @@ import { libraryRouter } from "./modules/library/library.routes";
 import { ensureAuth } from "./middlewares/auth";
 import readingProgressRouter from "./modules/reading-progress/reading_progress.routes";
 import { userRouter } from "./modules/users/users.routes";
+import { aiRouter } from "./modules/ai/ai.routes";
 import { globalLimiter } from "./config/rateLimit";
 import passport from "passport";
 
@@ -40,6 +41,7 @@ server.use("/books", ensureAuth, booksRouter);
 server.use("/library", ensureAuth, libraryRouter);
 server.use("/reading-progress", ensureAuth, readingProgressRouter);
 server.use("/users", ensureAuth, userRouter);
+server.use("/ai", ensureAuth, aiRouter);
 
 const PORT = process.env.PORT || 3000;
 
