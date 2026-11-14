@@ -175,7 +175,7 @@ export const enrichRecommendedBooks = async (
               : [raw.author],
           imageUrl: found.imageUrl,
           description: found.description || "",
-          pageCount: found.pageCount,
+          pageCount: found.pageCount?.toString(),
           publishedDate: found.publishedDate,
           rationale: raw.rationale,
         });

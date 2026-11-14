@@ -150,7 +150,7 @@ describe("Módulo de IA - Consultor de Leitura (Testes Unitários)", () => {
             authors: ["Jorge Luis Borges"],
             publishedDate: "1944",
             description: "Contos clássicos do labirinto.",
-            pageCount: "200",
+            pageCount: 200,
             categories: ["Ficção"],
             imageUrl: "http://books.google.com/ficcoes.jpg",
           },
