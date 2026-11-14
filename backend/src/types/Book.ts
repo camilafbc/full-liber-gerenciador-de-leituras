@@ -21,7 +21,7 @@ export type Book = {
   authors: string[];
   publishedDate: string;
   description: string;
-  pageCount?: string;
+  pageCount?: number;
   publisher?: string;
   categories: string[];
   imageUrl?: string;

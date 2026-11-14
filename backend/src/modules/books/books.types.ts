@@ -6,7 +6,7 @@ export type Book = {
   authors: string[];
   publishedDate: string;
   description: string;
-  pageCount?: string;
+  pageCount?: number;
   categories: string[];
   imageUrl?: string;
   isbn13?: string;

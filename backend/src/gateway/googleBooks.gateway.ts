@@ -5,7 +5,7 @@ interface GoogleBooksData {
   authors: string[];
   publishedDate: string;
   description: string;
-  pageCount: string;
+  pageCount?: number;
   publisher?: string;
   categories: string[];
   imageUrl?: string;
@@ -21,7 +21,7 @@ interface GoogleBookItem {
     authors: string[];
     publishedDate: string;
     description: string;
-    pageCount: string;
+    pageCount?: number | string;
     publisher?: string;
     categories: string[];
     imageLinks?: { thumbnail?: string };
@@ -40,7 +40,7 @@ export const googleBooksGateway = {
     const startIndex = (page - 1) * limit;
     const keyParam = API_KEY ? `&key=${API_KEY}` : "";
 
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanQuery)}&startIndex=${startIndex}&maxResults=${limit}&printType=books${keyParam}&orderBy=relevance&projection=lite&langRestrict=pt`;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanQuery)}&startIndex=${startIndex}&maxResults=${limit}&printType=books${keyParam}&orderBy=relevance&langRestrict=pt`;
 
     // Google Books API ocasionalmente oscila com 503 backendFailed.
     // Implementamos até 2 tentativas automáticas com pequeno delay para garantir estabilidade.
@@ -97,7 +97,12 @@ export const googleBooksGateway = {
       subtitle: item.volumeInfo.subtitle,
       publishedDate: item.volumeInfo.publishedDate,
       description: item.volumeInfo.description,
-      pageCount: item.volumeInfo.pageCount,
+      pageCount:
+        typeof item.volumeInfo.pageCount === "number"
+          ? item.volumeInfo.pageCount
+          : item.volumeInfo.pageCount
+            ? Number(item.volumeInfo.pageCount) || undefined
+            : undefined,
       publisher: item.volumeInfo.publisher,
       categories: item.volumeInfo.categories,
       imageUrl: item.volumeInfo.imageLinks?.thumbnail,
@@ -139,7 +144,12 @@ export const googleBooksGateway = {
       subtitle: data.volumeInfo.subtitle,
       publishedDate: data.volumeInfo.publishedDate,
       description: data.volumeInfo.description,
-      pageCount: data.volumeInfo.pageCount,
+      pageCount:
+        typeof data.volumeInfo.pageCount === "number"
+          ? data.volumeInfo.pageCount
+          : data.volumeInfo.pageCount
+            ? Number(data.volumeInfo.pageCount) || undefined
+            : undefined,
       publisher: data.volumeInfo.publisher,
       categories: data.volumeInfo.categories,
       imageUrl: data.volumeInfo.imageLinks?.thumbnail,
