@@ -90,18 +90,6 @@ export default async function ProfilePage() {
               </p>
             </div>
           </div>
-
-          {/* <div className="flex items-center gap-3 border-t border-border/40 pt-4 sm:border-t-0 sm:pt-0">
-            <div className="rounded-lg bg-muted/60 p-3 text-center sm:min-w-32">
-              <p className="text-[11px] font-medium text-muted-foreground">
-                Status da Conta
-              </p>
-              <div className="mt-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                <ShieldCheck className="size-4" />
-                <span>Ativa & Segura</span>
-              </div>
-            </div>
-          </div> */}
         </CardContent>
       </Card>
 
@@ -148,7 +136,7 @@ export default async function ProfilePage() {
 
         {/* Coluna Principal: Formulário de Atualização */}
         <div className="lg:col-span-2">
-          <Card className="border border-border/70 shadow-xs">
+          <Card className="border border-border/70 shadow-xs h-full">
             <CardHeader className="border-b border-border/50 pb-4">
               <div className="flex items-center justify-between">
                 <div>

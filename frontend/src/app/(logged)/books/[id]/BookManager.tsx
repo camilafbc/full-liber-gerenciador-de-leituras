@@ -601,7 +601,7 @@ export function BookManager({ initialBook }: { initialBook: Book }) {
               <Button
                 onClick={addToLibrary}
                 disabled={saving}
-                className="mt-1 w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                className="mt-1 w-full gap-2 bg-accent text-white hover:bg-accent/90"
               >
                 {saving ? (
                   <Loader2 className="size-4 animate-spin" />

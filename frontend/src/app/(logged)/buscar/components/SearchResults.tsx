@@ -186,7 +186,7 @@ export const SearchResults = ({ query }: SearchResultProps) => {
             externalId={book.externalId}
             title={book?.title}
             author={book?.authors}
-            pages={book?.pageCount || 0}
+            pages={book?.pageCount}
             description={book?.description}
             coverUrl={getCleanBookCover(book?.imageUrl)}
             variant="list"

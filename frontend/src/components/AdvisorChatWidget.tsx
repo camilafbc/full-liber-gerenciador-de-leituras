@@ -182,7 +182,7 @@ export function AdvisorChatWidget() {
         <Button
           onClick={toggleOpen}
           aria-label="Abrir Consultor de Leitura"
-          className="relative h-13 w-13 rounded-full bg-accent text-accent-foreground shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center p-0 border border-white/20"
+          className="relative h-13 w-13 rounded-full bg-accent text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center p-0 border border-white/20"
         >
           {isOpen ? (
             <ChevronDown className="size-6 transition-transform duration-200" />
@@ -375,6 +375,7 @@ export function AdvisorChatWidget() {
                                         <div className="flex items-center justify-between pt-1">
                                           <Link
                                             href={`/books/${book.externalId}`}
+                                            onClick={toggleOpen}
                                             className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent hover:underline"
                                           >
                                             <span>Ver detalhes do livro</span>

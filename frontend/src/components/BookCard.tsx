@@ -73,7 +73,7 @@ export const BookCard = ({
                     {author.join(", ")}
                   </p>
                 )}
-                {pages && pages > 0 && (
+                {pages != null && pages > 0 && (
                   <p className="text-xs text-muted-foreground/80 mt-1 flex items-center gap-1">
                     <BookOpen className="size-3 text-accent" />
                     {pages} páginas
@@ -125,7 +125,7 @@ export const BookCard = ({
                 {author.join(", ")}
               </p>
             )}
-            {pages && (
+            {pages != null && pages > 0 && (
               <p className="text-xs text-muted-foreground mt-0.5">
                 {pages} páginas
               </p>
