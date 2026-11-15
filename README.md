@@ -17,7 +17,52 @@
 
 ---
 
-Como desenvolvedora em constante evolução, construí o **Líber** como um projeto de estudos aprofundado, aplicando práticas modernas de engenharia de software que vão além do básico de CRUDs:
+## ✨ Funcionalidades da Aplicação
+
+### 🔍 1. Busca Inteligente de Livros (Google Books API)
+
+- **Pesquisa Dinâmica**: Busca de títulos, autores ou palavras-chave com _debounce_ otimizado para evitar requisições desnecessárias.
+- **Painel de Detalhes (_Sheet_)**: Visualização rápida da sinopse, capa em alta resolução, editora, data de publicação, categorias e número total de páginas antes de adicionar à coleção.
+- **Adição com 1 Clique**: Inclusão ágil do livro diretamente em qualquer uma das estantes.
+
+### 📚 2. Gerenciamento de Estantes e Biblioteca Pessoal
+
+- **Organização por Status de Leitura**:
+  - ⏳ **Lendo**: Livros em andamento com progresso em tempo real.
+  - 📌 **Quero Ler**: Lista de desejos e próximas leituras planejadas.
+  - ✅ **Concluído**: Histórico de livros finalizados com data de término.
+  - ⛔ **Abandonei**: Registro de leituras interrompidas sem perda de histórico.
+- **Filtros e Visualização**: Navegação rápida através de abas interativas (_Tabs_), com mensagens acolhedoras e ilustradas para estados vazios (_Empty States_).
+
+### 📈 3. Acompanhamento e Progresso de Páginas
+
+- **Cálculo Automático**: Atualização da página atual com cálculo instantâneo da porcentagem lida (`%`).
+- **Barra de Progresso Visual**: Indicadores claros do ritmo de leitura e cálculo dinâmico de _"quantas páginas faltam para concluir"_.
+- **Histórico de Leituras**: Registro sequencial do avanço das páginas para manter a consistência do hábito.
+
+### 📊 4. Dashboard de Hábitos Literários (Home)
+
+- **Card de Destaque (_Currently Reading_)**: Acesso rápido ao livro em andamento com atalho direto para continuar a leitura.
+- **Métricas e Estatísticas**: Painel com totais de livros lidos, leituras ativas, livros na fila de desejos e volume total de páginas concluídas.
+- **Atalhos Rápidos**: Navegação fluida para explorar novos títulos e gerenciar a estante.
+
+### 🔐 5. Autenticação Segura & Perfil do Leitor
+
+- **Múltiplos Métodos de Login**:
+  - Cadastro local com e-mail e senha criptografada via **Bcrypt**.
+  - Login Social integrado com **Google OAuth 2.0**.
+- **Sessões Protegidas**: Autenticação stateless via **Tokens JWT** seguros armazenados em cookies HTTP.
+- **Página de Perfil**: Gerenciamento de informações pessoais, foto de perfil e personalização da conta.
+
+### 🎨 6. Experiência de Uso (UX/UI) e Acessibilidade
+
+- **Dark Mode & Light Mode**: Alternância de tema com persistência automática de preferências via `next-themes`.
+- **Design 100% Responsivo**: Layout adaptável para smartphones, tablets e desktops.
+- **Componentes Acessíveis**: Interface construída com base no **Shadcn UI** e primitivos do **Radix UI**, garantindo conformidade com padrões de acessibilidade (a11y), navegação por teclado e feedback visual instantâneo com estados de carregamento (_Skeletons_).
+
+---
+
+## 🎯 Desenvolvimento
 
 ### 🧩 1. Arquitetura Modular por Features (_Vertical Slice Architecture_)
 
