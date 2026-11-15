@@ -13,19 +13,36 @@
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
 </p>
 
-> **Líber** é uma aplicação web full stack moderna e responsiva voltada para o gerenciamento de hábitos literários. Com ela, é possível pesquisar títulos na base do Google Books, organizar estantes personalizadas (Lendo, Quero Ler, Lidos, Abandonados), registrar metas e acompanhar a evolução detalhada de páginas lidas.
+<p align="center">
+  <img src="./.github/assets/home-demo.png" alt="Visão Geral do Líber no Desktop" width="100%" />
+</p>
+
+> **Líber** é uma aplicação web full stack moderna e responsiva voltada para o gerenciamento de hábitos literários. Com ela, é possível pesquisar títulos na base do Google Books, organizar estantes personalizadas (Lendo, Quero Ler, Lidos, Abandonados), registrar metas, acompanhar a evolução detalhada de páginas lidas e interagir com um assistente inteligente integrado.
+
+<p align="center">
+  <img src="./.github/assets/mobile-demo.gif" alt="Demonstração mobile: Assistente com Inteligência Artificial, catálogo e Dark Mode" width="300" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <br />
+  <em>Demonstração Mobile: Recomendação com Assistente de IA, catálogo de livros e suporte a Dark Mode</em>
+</p>
+
+👉 Acesso: https://my-liber.vercel.app/
 
 ---
 
 ## ✨ Funcionalidades da Aplicação
 
-### 🔍 1. Busca Inteligente de Livros (Google Books API)
+### 🤖 1. Assistente Literário com Inteligência Artificial (Google Gemini)
+
+- **Recomendações Personalizadas**: Interação em linguagem natural para receber sugestões de livros com base no gosto literário.
+- **Ações Contextuais**: Navegação direta da recomendação para a página do livro e adição rápida à estante pessoal.
+
+### 🔍 2. Busca Inteligente de Livros (Google Books API)
 
 - **Pesquisa Dinâmica**: Busca de títulos, autores ou palavras-chave com _debounce_ otimizado para evitar requisições desnecessárias.
 - **Painel de Detalhes (_Sheet_)**: Visualização rápida da sinopse, capa em alta resolução, editora, data de publicação, categorias e número total de páginas antes de adicionar à coleção.
 - **Adição com 1 Clique**: Inclusão ágil do livro diretamente em qualquer uma das estantes.
 
-### 📚 2. Gerenciamento de Estantes e Biblioteca Pessoal
+### 📚 3. Gerenciamento de Estantes e Biblioteca Pessoal
 
 - **Organização por Status de Leitura**:
   - ⏳ **Lendo**: Livros em andamento com progresso em tempo real.
@@ -34,19 +51,19 @@
   - ⛔ **Abandonei**: Registro de leituras interrompidas sem perda de histórico.
 - **Filtros e Visualização**: Navegação rápida através de abas interativas (_Tabs_), com mensagens acolhedoras e ilustradas para estados vazios (_Empty States_).
 
-### 📈 3. Acompanhamento e Progresso de Páginas
+### 📈 4. Acompanhamento e Progresso de Páginas
 
 - **Cálculo Automático**: Atualização da página atual com cálculo instantâneo da porcentagem lida (`%`).
 - **Barra de Progresso Visual**: Indicadores claros do ritmo de leitura e cálculo dinâmico de _"quantas páginas faltam para concluir"_.
 - **Histórico de Leituras**: Registro sequencial do avanço das páginas para manter a consistência do hábito.
 
-### 📊 4. Dashboard de Hábitos Literários (Home)
+### 📊 5. Dashboard de Hábitos Literários (Home)
 
 - **Card de Destaque (_Currently Reading_)**: Acesso rápido ao livro em andamento com atalho direto para continuar a leitura.
 - **Métricas e Estatísticas**: Painel com totais de livros lidos, leituras ativas, livros na fila de desejos e volume total de páginas concluídas.
 - **Atalhos Rápidos**: Navegação fluida para explorar novos títulos e gerenciar a estante.
 
-### 🔐 5. Autenticação Segura & Perfil do Leitor
+### 🔐 6. Autenticação Segura & Perfil do Leitor
 
 - **Múltiplos Métodos de Login**:
   - Cadastro local com e-mail e senha criptografada via **Bcrypt**.
@@ -54,7 +71,7 @@
 - **Sessões Protegidas**: Autenticação stateless via **Tokens JWT** seguros armazenados em cookies HTTP.
 - **Página de Perfil**: Gerenciamento de informações pessoais, foto de perfil e personalização da conta.
 
-### 🎨 6. Experiência de Uso (UX/UI) e Acessibilidade
+### 🎨 7. Experiência de Uso (UX/UI) e Acessibilidade
 
 - **Dark Mode & Light Mode**: Alternância de tema com persistência automática de preferências via `next-themes`.
 - **Design 100% Responsivo**: Layout adaptável para smartphones, tablets e desktops.
@@ -188,8 +205,8 @@ Você pode executar o projeto utilizando **Docker Compose** (recomendado para pr
 1. **Clone o repositório:**
 
    ```bash
-   git clone https://github.com/seu-usuario/liber-gerenciador-de-leituras.git
-   cd liber-gerenciador-de-leituras
+   git clone https://github.com/camilafbc/full-liber-gerenciador-de-leituras.git
+   cd full-liber-gerenciador-de-leituras
    ```
 
 2. **Configure os arquivos de ambiente:**
